@@ -64,7 +64,7 @@ public class settingListActivity extends FragmentActivity
         	// Device does not support Bluetooth
         	return;
         }
-        if( _bluetoothAdapter.isEnabled() )
+        if( !_bluetoothAdapter.isEnabled() )
         {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);        	
@@ -83,9 +83,7 @@ public class settingListActivity extends FragmentActivity
         android.widget.Button button = (android.widget.Button)findViewById(R.id.button1);
         button.setOnClickListener( new View.OnClickListener(){
         	@Override
-        	public void onClick(View v ){
-                IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-                registerReceiver(_receiver, filter);        		
+        	public void onClick(View v ){    		
         		_bluetoothAdapter.startDiscovery();
         	}
         });
