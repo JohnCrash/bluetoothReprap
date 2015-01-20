@@ -8,14 +8,17 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.IntentFilter;
 import java.util.Set;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.ArrayAdapter;
-import java.util.List;
-import java.util.Map;
+import java.util.HashMap;
 import android.widget.AdapterView;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.widget.EditText;
 
 /**
  * An activity representing a list of Items. This activity
@@ -46,7 +49,7 @@ public class settingListActivity extends FragmentActivity
     private ListView _blueList;
     private ArrayAdapter<String> _arrayAdapter;
     private java.lang.Thread _stopThread;
-    private boolean _stop = false;
+    private HashMap<String,BluetoothDevice> _DeviceByName;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,6 +72,16 @@ public class settingListActivity extends FragmentActivity
         if( _bluetoothAdapter == null )
         {
         	// Device does not support Bluetooth
+        	new AlertDialog.Builder(this).setTitle("ERROR")
+        	.setMessage("Device does not support Bluetooth.")
+        	.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					//exit
+					System.exit(0);
+				}
+			})
+        	.show();
         	return;
         }
         if( !_bluetoothAdapter.isEnabled() )
@@ -76,6 +89,7 @@ public class settingListActivity extends FragmentActivity
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);        	
         }
+        _DeviceByName = new HashMap<String,BluetoothDevice>();
         Set<BluetoothDevice> pairedDevices =_bluetoothAdapter.getBondedDevices();
         _blueList = (ListView)findViewById(R.id.listView1);
 
@@ -85,7 +99,8 @@ public class settingListActivity extends FragmentActivity
         {
         	for(BluetoothDevice device : pairedDevices ){
         		Log.d(device.getName(),device.getAddress());
-        		_arrayAdapter.add(String.format("%s *",device.getName()));
+        		_arrayAdapter.add(device.getName());
+        		_DeviceByName.put( device.getName(),device);
         	}
         }
         
@@ -105,17 +120,33 @@ public class settingListActivity extends FragmentActivity
         _blueList.setOnItemClickListener( new AdapterView.OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView parent,View view,int position,long id) {
-				Log.d("onitemclick",_arrayAdapter.getItem( position ));
+                AlertDialog dialog = new AlertDialog.Builder(settingListActivity.this)  
+                .setIcon(android.R.drawable.btn_star_big_on) 
+                .setTitle("Input PIN")
+                .setPositiveButton("Cancel", _onClickPair)  
+                .setNegativeButton("OK",  _onClickPair).create();
+                dialog.setView(new EditText(settingListActivity.this));
+                dialog.show();
 			}
 		});
         startBluetoothDiscovery();
     }
+    
+    private final AlertDialog.OnClickListener _onClickPair = new AlertDialog.OnClickListener(){
+    	@Override
+    	public void onClick(DialogInterface dialog,int whitch)
+    	{
+    		if( whitch == Dialog.BUTTON_NEGATIVE ){
+    		}
+    	}
+    };
     /*
      * start bluetooth discovery
      */
     private void startBluetoothDiscovery()
     {
 		_arrayAdapter.clear();
+		_DeviceByName.clear();
 		_stopThread = new java.lang.Thread(){
 				@Override
 				public void run(){
@@ -144,7 +175,7 @@ public class settingListActivity extends FragmentActivity
 		Log.d("INFO","bluetooth startDiscovery");
 		_bluetoothAdapter.startDiscovery();    	
     }
-    private final BroadcastReceiver _receiver = new BroadcastReceiver() {
+    private BroadcastReceiver _receiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             // When discovery finds a device
@@ -153,10 +184,8 @@ public class settingListActivity extends FragmentActivity
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 // Add the name and address to an array adapter to show in a ListView
                 Log.d(device.getName(),device.getAddress());
-                if( device.getBondState() == BluetoothDevice.BOND_NONE )
-                	_arrayAdapter.add(String.format("%s",device.getName()));
-                else
-                	_arrayAdapter.add(String.format("%s *",device.getName()));
+                _arrayAdapter.add(String.format("%s",device.getName()));
+                _DeviceByName.put( device.getName(),device);
             }
         }
     };
