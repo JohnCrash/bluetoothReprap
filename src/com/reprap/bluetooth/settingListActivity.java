@@ -19,7 +19,7 @@ import android.widget.AdapterView;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.widget.EditText;
-
+import android.view.inputmethod.InputMethodManager;
 /**
  * An activity representing a list of Items. This activity
  * has different presentations for handset and tablet-size devices. On
@@ -50,6 +50,8 @@ public class settingListActivity extends FragmentActivity
     private ArrayAdapter<String> _arrayAdapter;
     private java.lang.Thread _stopThread;
     private HashMap<String,BluetoothDevice> _DeviceByName;
+    private String _selectDeviceName;
+    private EditText _input;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -119,14 +121,35 @@ public class settingListActivity extends FragmentActivity
         });
         _blueList.setOnItemClickListener( new AdapterView.OnItemClickListener() {
 			@Override
-			public void onItemClick(AdapterView parent,View view,int position,long id) {
-                AlertDialog dialog = new AlertDialog.Builder(settingListActivity.this)  
-                .setIcon(android.R.drawable.btn_star_big_on) 
-                .setTitle("Input PIN")
-                .setPositiveButton("Cancel", _onClickPair)  
-                .setNegativeButton("OK",  _onClickPair).create();
-                dialog.setView(new EditText(settingListActivity.this));
-                dialog.show();
+			public void onItemClick(AdapterView<?> parent,View view,int position,long id) {
+				BluetoothDevice device = _DeviceByName.get(_arrayAdapter.getItem(position));
+				if( device != null &&
+						(device.getBondState() == BluetoothDevice.BOND_BONDED || device.getBondState()==BluetoothDevice.BOND_BONDING) ){
+					//do connect...
+				}else if(device != null) {
+					_selectDeviceName = _arrayAdapter.getItem(position);
+	                AlertDialog dialog = new AlertDialog.Builder(settingListActivity.this)  
+	                .setIcon(android.R.drawable.btn_star_big_on) 
+	                .setTitle("Input PIN")
+	                .setPositiveButton("Cancel", _onClickPair)  
+	                .setNegativeButton("OK",  _onClickPair).create();
+	                _input = new EditText(settingListActivity.this);
+	                dialog.setView(_input);
+	                dialog.show();
+	                /*
+	                 *  show softboard
+	                 */
+	                _input.setFocusable(true);
+	                _input.requestFocus();
+	                (new  android.os.Handler()).postDelayed(new java.lang.Runnable() {
+	                	@Override
+	                		public void run() {
+                			InputMethodManager imm = (InputMethodManager)_input.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                			imm.showSoftInput(_input, InputMethodManager.SHOW_FORCED);
+	                	}},100);
+				}else{
+					Log.d("ERROR","bluetooth device = null");
+				}
 			}
 		});
         startBluetoothDiscovery();
@@ -136,7 +159,25 @@ public class settingListActivity extends FragmentActivity
     	@Override
     	public void onClick(DialogInterface dialog,int whitch)
     	{
+    		if( _input != null  ){
+    			InputMethodManager imm = (InputMethodManager)_input.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+    			imm.hideSoftInputFromWindow(_input.getWindowToken(), 0);
+    		}
+    			
     		if( whitch == Dialog.BUTTON_NEGATIVE ){
+    			BluetoothDevice device = _DeviceByName.get(_selectDeviceName);
+    			if( device != null && _input != null ){
+    				Log.d("PIN",String.format("%s",_input.getText()));
+    				 CharSequence text = _input.getText();
+    				 if( text.length() > 0 ){
+    					 byte [] pin = new byte[text.length()];
+    					 for( int i = 0;i<text.length();i++)
+    						 pin[i] = (byte)text.charAt(i);
+    					 Log.d("INFO",String.format("setPin result:%s",device.setPin(pin)?"true":"error"));
+    				 }
+    			}else{
+    				Log.d("ERROR","device = null");
+    			}
     		}
     	}
     };
