@@ -11,8 +11,12 @@ import android.content.Context;
 import android.content.IntentFilter;
 import java.util.Set;
 import android.view.View;
-
 import android.widget.ListView;
+import android.widget.ArrayAdapter;
+import java.util.List;
+import java.util.Map;
+import android.widget.AdapterView;
+
 /**
  * An activity representing a list of Items. This activity
  * has different presentations for handset and tablet-size devices. On
@@ -39,7 +43,10 @@ public class settingListActivity extends FragmentActivity
     private boolean mTwoPane;
     private BluetoothAdapter _bluetoothAdapter;
     private static int REQUEST_ENABLE_BT = 1;
-    
+    private ListView _blueList;
+    private ArrayAdapter<String> _arrayAdapter;
+    private java.lang.Thread _stopThread;
+    private boolean _stop = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,23 +77,72 @@ public class settingListActivity extends FragmentActivity
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);        	
         }
         Set<BluetoothDevice> pairedDevices =_bluetoothAdapter.getBondedDevices();
-        ListView list = (ListView)findViewById(R.id.listView1);
+        _blueList = (ListView)findViewById(R.id.listView1);
+
+        _arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1);
+        _blueList.setAdapter(_arrayAdapter);
         if( pairedDevices.size() > 0 )
         {
         	for(BluetoothDevice device : pairedDevices ){
         		Log.d(device.getName(),device.getAddress());
+        		_arrayAdapter.add(String.format("%s *",device.getName()));
         	}
         }
+        
+        /*
+         * register receiver for blue tooth discovery 
+         */
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         registerReceiver(_receiver, filter);
-        _bluetoothAdapter.startDiscovery();
+        
         android.widget.Button button = (android.widget.Button)findViewById(R.id.button1);
         button.setOnClickListener( new View.OnClickListener(){
         	@Override
-        	public void onClick(View v ){    		
-        		_bluetoothAdapter.startDiscovery();
+        	public void onClick(View v ){    	
+        		startBluetoothDiscovery();
         	}
         });
+        _blueList.setOnItemClickListener( new AdapterView.OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView parent,View view,int position,long id) {
+				Log.d("onitemclick",_arrayAdapter.getItem( position ));
+			}
+		});
+        startBluetoothDiscovery();
+    }
+    /*
+     * start bluetooth discovery
+     */
+    private void startBluetoothDiscovery()
+    {
+		_arrayAdapter.clear();
+		_stopThread = new java.lang.Thread(){
+				@Override
+				public void run(){
+					Thread thisThread = Thread.currentThread();
+					int delay = 12*100;
+					while( _stopThread==thisThread )
+					{
+						try{
+							sleep(10);
+						}catch(InterruptedException e)
+						{
+							Log.d("INFO","bluetooth cancelDiscovery for interrupt");
+							_bluetoothAdapter.cancelDiscovery();
+							return;
+						}
+						if( delay-- <= 0 )
+						{
+							Log.d("INFO","bluetooth cancelDiscovery");
+							_bluetoothAdapter.cancelDiscovery();
+							return;
+						}
+					}
+				}
+			};
+		_stopThread.start();
+		Log.d("INFO","bluetooth startDiscovery");
+		_bluetoothAdapter.startDiscovery();    	
     }
     private final BroadcastReceiver _receiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -97,6 +153,10 @@ public class settingListActivity extends FragmentActivity
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 // Add the name and address to an array adapter to show in a ListView
                 Log.d(device.getName(),device.getAddress());
+                if( device.getBondState() == BluetoothDevice.BOND_NONE )
+                	_arrayAdapter.add(String.format("%s",device.getName()));
+                else
+                	_arrayAdapter.add(String.format("%s *",device.getName()));
             }
         }
     };
