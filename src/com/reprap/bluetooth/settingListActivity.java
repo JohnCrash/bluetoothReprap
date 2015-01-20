@@ -20,6 +20,8 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.widget.EditText;
 import android.view.inputmethod.InputMethodManager;
+import android.bluetooth.BluetoothSocket;
+
 /**
  * An activity representing a list of Items. This activity
  * has different presentations for handset and tablet-size devices. On
@@ -52,6 +54,7 @@ public class settingListActivity extends FragmentActivity
     private HashMap<String,BluetoothDevice> _DeviceByName;
     private String _selectDeviceName;
     private EditText _input;
+    private BluetoothSocket _socket;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -126,9 +129,58 @@ public class settingListActivity extends FragmentActivity
 				if( device != null &&
 						(device.getBondState() == BluetoothDevice.BOND_BONDED || device.getBondState()==BluetoothDevice.BOND_BONDING) ){
 					//do connect...
+					_bluetoothAdapter.cancelDiscovery();
 					try{
-					device.createRfcommSocketToServiceRecord(java.util.UUID.randomUUID());
-					}catch( )
+						//_socket = device.createRfcommSocketToServiceRecord(java.util.UUID.fromString("00001105-0000-1000-8000-00805F9B34FB"));
+						java.lang.reflect.Method m = device.getClass().getMethod("createInsecureRfcommSocket", new Class[] {int.class});
+						_socket = (BluetoothSocket) m.invoke(device, 1);
+						new Thread(){
+							@Override
+							public void run(){
+								final java.io.InputStream in;
+								final java.io.OutputStream out;
+								try{
+									_socket.connect();
+									in = _socket.getInputStream();
+									out = _socket.getOutputStream();
+								}catch(java.io.IOException e){
+									try{
+										_socket.close();
+									}catch(java.io.IOException s){
+										Log.d("Close ERROR",e.getMessage());
+									}
+									Log.d("ERROR",e.getMessage());
+									return;
+								}
+								byte[] cmd ={'A','T'};
+								try{
+								out.write(cmd);
+								}catch(java.io.IOException e){
+									Log.d("Write ERROPR",e.getMessage());
+								}
+								while(true){
+									try{
+										byte [] buf = new byte[32];
+										int len = in.read( buf);
+										if( len > 0 )
+										{
+											Log.d("READ",String.format("%s",buf));
+										}else{
+											try{sleep(10);}catch(InterruptedException e){}
+										}
+									}catch(java.io.IOException e){
+										Log.d("ERROR",e.toString());
+									}
+								}
+							}
+						}.start();
+					}catch(Exception e)
+					{
+						_socket = null;
+						Log.d("ERROR",e.toString());
+						return;
+					}				
+					
 				}else if(device != null) {
 					_selectDeviceName = _arrayAdapter.getItem(position);
 	                AlertDialog dialog = new AlertDialog.Builder(settingListActivity.this)  
@@ -176,7 +228,7 @@ public class settingListActivity extends FragmentActivity
     					 byte [] pin = new byte[text.length()];
     					 for( int i = 0;i<text.length();i++)
     						 pin[i] = (byte)text.charAt(i);
-    					 Log.d("INFO",String.format("setPin result:%s",device.setPin(pin)?"true":"error"));
+    					 //Log.d("INFO",String.format("setPin result:%s",device.setPin(pin)?"true":"error"));
     				 }
     			}else{
     				Log.d("ERROR","device = null");
