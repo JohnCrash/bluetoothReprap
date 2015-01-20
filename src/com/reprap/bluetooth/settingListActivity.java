@@ -126,6 +126,9 @@ public class settingListActivity extends FragmentActivity
 				if( device != null &&
 						(device.getBondState() == BluetoothDevice.BOND_BONDED || device.getBondState()==BluetoothDevice.BOND_BONDING) ){
 					//do connect...
+					try{
+					device.createRfcommSocketToServiceRecord(java.util.UUID.randomUUID());
+					}catch( )
 				}else if(device != null) {
 					_selectDeviceName = _arrayAdapter.getItem(position);
 	                AlertDialog dialog = new AlertDialog.Builder(settingListActivity.this)  
