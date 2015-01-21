@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <string name="app_name">Reprap</string>
     <string name="title_setting_detail">setting Detail</string>
-
+    <string name="title_console">Console</string>
+    <string name="select_bluetooth">Select bluetooth device</string>
 </resources>

@@ -126,6 +126,12 @@ public class settingListActivity extends FragmentActivity
 			@Override
 			public void onItemClick(AdapterView<?> parent,View view,int position,long id) {
 				BluetoothDevice device = _DeviceByName.get(_arrayAdapter.getItem(position));
+				//ConselActivity
+				Intent intent = new Intent(settingListActivity.this,ConselActivity.class);
+				if( intent != null ){
+					startActivity(intent);
+					return;
+				}				
 				if( device != null &&
 						(device.getBondState() == BluetoothDevice.BOND_BONDED || device.getBondState()==BluetoothDevice.BOND_BONDING) ){
 					//do connect...

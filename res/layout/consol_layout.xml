@@ -7,15 +7,16 @@
     <ListView
         android:id="@+id/listView1"
         android:layout_width="match_parent"
-        android:layout_height="290dp"
-        android:layout_weight="0.85" >
+        android:layout_height="364dp"
+        android:layout_weight="1.02" >
     </ListView>
 
-    <Button
-        android:id="@+id/button1"
+    <EditText
+        android:id="@+id/editText1"
         android:layout_width="match_parent"
-        android:layout_height="44dp"
-        android:layout_weight="0.30"
-        android:text="scan" />
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:imeOptions="actionDone"
+        android:inputType="text" />
 
 </LinearLayout>

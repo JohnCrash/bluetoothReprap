@@ -5,7 +5,7 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="14"
+        android:minSdkVersion="10"
         android:targetSdkVersion="19" />
     <uses-permission android:name="android.permission.BLUETOOTH"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
@@ -18,7 +18,7 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name="com.reprap.bluetooth.settingListActivity"
-            android:label="@string/app_name" >
+            android:label="@string/select_bluetooth" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -33,6 +33,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.reprap.bluetooth.settingListActivity" />
         </activity>
+        <activity
+            android:name="com.reprap.bluetooth.ConselActivity"
+            android:label="@string/title_console"
+            android:parentActivityName="com.reprap.bluetooth.ConselActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.reprap.bluetooth.settingListActivity" />
+        </activity>        
     </application>
 
 </manifest>
