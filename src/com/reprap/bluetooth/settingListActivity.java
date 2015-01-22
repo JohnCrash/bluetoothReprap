@@ -57,9 +57,10 @@ public class settingListActivity extends FragmentActivity
     private BluetoothSocket _socket;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+    	Log.d("Activity ","onCreate is called~");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.blue_enum_interface);
-
+        setTitle(R.string.select_bluetooth);
         if (findViewById(R.id.setting_detail_container) != null) {
             // The detail container view will be present only in the
             // large-screen layouts (res/values-large and
@@ -125,68 +126,18 @@ public class settingListActivity extends FragmentActivity
         _blueList.setOnItemClickListener( new AdapterView.OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent,View view,int position,long id) {
-				BluetoothDevice device = _DeviceByName.get(_arrayAdapter.getItem(position));
-				//ConselActivity
-				Intent intent = new Intent(settingListActivity.this,ConselActivity.class);
-				if( intent != null ){
-					startActivity(intent);
-					return;
-				}				
+				BluetoothDevice device = _DeviceByName.get(_arrayAdapter.getItem(position));				
 				if( device != null &&
 						(device.getBondState() == BluetoothDevice.BOND_BONDED || device.getBondState()==BluetoothDevice.BOND_BONDING) ){
 					//do connect...
+					//ConselActivity
 					_bluetoothAdapter.cancelDiscovery();
-					try{
-						//_socket = device.createRfcommSocketToServiceRecord(java.util.UUID.fromString("00001105-0000-1000-8000-00805F9B34FB"));
-						java.lang.reflect.Method m = device.getClass().getMethod("createInsecureRfcommSocket", new Class[] {int.class});
-						_socket = (BluetoothSocket) m.invoke(device, 1);
-						new Thread(){
-							@Override
-							public void run(){
-								final java.io.InputStream in;
-								final java.io.OutputStream out;
-								try{
-									_socket.connect();
-									in = _socket.getInputStream();
-									out = _socket.getOutputStream();
-								}catch(java.io.IOException e){
-									try{
-										_socket.close();
-									}catch(java.io.IOException s){
-										Log.d("Close ERROR",e.getMessage());
-									}
-									Log.d("ERROR",e.getMessage());
-									return;
-								}
-								byte[] cmd ={'A','T'};
-								try{
-								out.write(cmd);
-								}catch(java.io.IOException e){
-									Log.d("Write ERROPR",e.getMessage());
-								}
-								while(true){
-									try{
-										byte [] buf = new byte[32];
-										int len = in.read( buf);
-										if( len > 0 )
-										{
-											Log.d("READ",String.format("%s",buf));
-										}else{
-											try{sleep(10);}catch(InterruptedException e){}
-										}
-									}catch(java.io.IOException e){
-										Log.d("ERROR",e.toString());
-									}
-								}
-							}
-						}.start();
-					}catch(Exception e)
-					{
-						_socket = null;
-						Log.d("ERROR",e.toString());
+					Intent intent = new Intent(settingListActivity.this,ConselActivity.class);
+					if( intent != null ){
+						intent.putExtra("device",device);
+						startActivity(intent);
 						return;
-					}				
-					
+					}					
 				}else if(device != null) {
 					_selectDeviceName = _arrayAdapter.getItem(position);
 	                AlertDialog dialog = new AlertDialog.Builder(settingListActivity.this)  
@@ -320,5 +271,30 @@ public class settingListActivity extends FragmentActivity
             detailIntent.putExtra(settingDetailFragment.ARG_ITEM_ID, id);
             startActivity(detailIntent);
         }
+    }
+    @Override
+    public void onPause(){
+    	super.onPause();
+    	Log.d("Activity ","onPause is called");
+    }
+    @Override
+    public void onStop(){
+    	super.onStop();
+    	Log.d("Activity ","onStop is called");
+    }
+    @Override
+    public void onDestroy(){
+    	Log.d("Activity ","onDestroy is called");
+    	super.onDestroy();
+    }
+    @Override
+    public void onResume(){
+    	super.onResume();
+    	Log.d("Activity ","onResume is called");
+    }
+    @Override
+    public void onStart(){
+    	super.onStart();
+    	Log.d("Activity ","onStart is called");
     }
 }
