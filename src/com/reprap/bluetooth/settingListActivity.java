@@ -185,7 +185,7 @@ public class settingListActivity extends FragmentActivity
     					 byte [] pin = new byte[text.length()];
     					 for( int i = 0;i<text.length();i++)
     						 pin[i] = (byte)text.charAt(i);
-    					 //Log.d("INFO",String.format("setPin result:%s",device.setPin(pin)?"true":"error"));
+    					 Log.d("INFO",String.format("setPin result:%s",device.setPin(pin)?"true":"error"));
     				 }
     			}else{
     				Log.d("ERROR","device = null");
