@@ -39,7 +39,7 @@
             android:parentActivityName="com.reprap.bluetooth.ConselActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.reprap.bluetooth.settingListActivity" />
+                android:value="com.reprap.bluetooth.ConselActivity" />
         </activity>        
     </application>
 

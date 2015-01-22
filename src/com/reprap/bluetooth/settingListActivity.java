@@ -10,11 +10,15 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.IntentFilter;
+
 import java.util.Set;
+
 import android.view.View;
 import android.widget.ListView;
 import android.widget.ArrayAdapter;
+
 import java.util.HashMap;
+
 import android.widget.AdapterView;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -55,6 +59,7 @@ public class settingListActivity extends FragmentActivity
     private String _selectDeviceName;
     private EditText _input;
     private BluetoothSocket _socket;
+    private static String TAG = "INFO";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
     	Log.d("Activity ","onCreate is called~");
@@ -160,7 +165,7 @@ public class settingListActivity extends FragmentActivity
                 			imm.showSoftInput(_input, InputMethodManager.SHOW_FORCED);
 	                	}},100);
 				}else{
-					Log.d("ERROR","bluetooth device = null");
+					Log.d(TAG,"bluetooth device = null");
 				}
 			}
 		});
@@ -172,19 +177,19 @@ public class settingListActivity extends FragmentActivity
             Log.d("pairDevice()", "Start Pairing...");
             java.lang.reflect.Method m = device.getClass().getMethod("createBond", (Class[]) null);
             m.invoke(device, (Object[]) null);
-            Log.d("pairDevice()", "Pairing finished.");
+            Log.d(TAG, "Pairing finished.");
         } catch (Exception e) {
-            Log.e("pairDevice()", e.getMessage());
+            Log.e(TAG, e.getMessage());
         }
     }
     private void unpairDevice(BluetoothDevice device) {
         try {
-            Log.d("unpairDevice()", "Start Un-Pairing...");
+            Log.d(TAG, "Start Un-Pairing...");
             java.lang.reflect.Method m = device.getClass().getMethod("removeBond", (Class[]) null);
             m.invoke(device, (Object[]) null);
-            Log.d("unpairDevice()", "Un-Pairing finished.");
+            Log.d(TAG, "Un-Pairing finished.");
         } catch (Exception e) {
-            Log.e("unpairDevice()", e.getMessage());
+            Log.e(TAG, e.getMessage());
         }
     }
     private final AlertDialog.OnClickListener _onClickPair = new AlertDialog.OnClickListener(){
@@ -205,10 +210,10 @@ public class settingListActivity extends FragmentActivity
     					 byte [] pin = new byte[text.length()];
     					 for( int i = 0;i<text.length();i++)
     						 pin[i] = (byte)text.charAt(i);
-    					 Log.d("INFO",String.format("setPin result:%s",device.setPin(pin)?"true":"error"));
+    					// Log.d(settingListActivity.TAG,String.format("setPin result:%s",device.setPin(pin)?"true":"error"));
     				 }
     			}else{
-    				Log.d("ERROR","device = null");
+    				Log.d(TAG,"device = null");
     			}
     		}
     	}
@@ -231,7 +236,7 @@ public class settingListActivity extends FragmentActivity
 							sleep(10);
 						}catch(InterruptedException e)
 						{
-							Log.d("INFO","bluetooth cancelDiscovery for interrupt");
+							Log.d(TAG,"bluetooth cancelDiscovery for interrupt");
 							_bluetoothAdapter.cancelDiscovery();
 							return;
 						}
@@ -245,7 +250,7 @@ public class settingListActivity extends FragmentActivity
 				}
 			};
 		_stopThread.start();
-		Log.d("INFO","bluetooth startDiscovery");
+		Log.d(TAG,"bluetooth startDiscovery");
 		_bluetoothAdapter.startDiscovery();    	
     }
     private BroadcastReceiver _receiver = new BroadcastReceiver() {
@@ -295,26 +300,26 @@ public class settingListActivity extends FragmentActivity
     @Override
     public void onPause(){
     	super.onPause();
-    	Log.d("Activity ","onPause is called");
+    	Log.d(TAG,"onPause is called");
     }
     @Override
     public void onStop(){
     	super.onStop();
-    	Log.d("Activity ","onStop is called");
+    	Log.d(TAG,"onStop is called");
     }
     @Override
     public void onDestroy(){
-    	Log.d("Activity ","onDestroy is called");
+    	Log.d(TAG,"onDestroy is called");
     	super.onDestroy();
     }
     @Override
     public void onResume(){
     	super.onResume();
-    	Log.d("Activity ","onResume is called");
+    	Log.d(TAG,"onResume is called");
     }
     @Override
     public void onStart(){
     	super.onStart();
-    	Log.d("Activity ","onStart is called");
+    	Log.d(TAG,"onStart is called");
     }
 }
