@@ -167,6 +167,26 @@ public class settingListActivity extends FragmentActivity
         startBluetoothDiscovery();
     }
     
+    private void pairDevice( BluetoothDevice device){
+        try {
+            Log.d("pairDevice()", "Start Pairing...");
+            java.lang.reflect.Method m = device.getClass().getMethod("createBond", (Class[]) null);
+            m.invoke(device, (Object[]) null);
+            Log.d("pairDevice()", "Pairing finished.");
+        } catch (Exception e) {
+            Log.e("pairDevice()", e.getMessage());
+        }
+    }
+    private void unpairDevice(BluetoothDevice device) {
+        try {
+            Log.d("unpairDevice()", "Start Un-Pairing...");
+            java.lang.reflect.Method m = device.getClass().getMethod("removeBond", (Class[]) null);
+            m.invoke(device, (Object[]) null);
+            Log.d("unpairDevice()", "Un-Pairing finished.");
+        } catch (Exception e) {
+            Log.e("unpairDevice()", e.getMessage());
+        }
+    }
     private final AlertDialog.OnClickListener _onClickPair = new AlertDialog.OnClickListener(){
     	@Override
     	public void onClick(DialogInterface dialog,int whitch)
