@@ -6,14 +6,12 @@ import android.os.Message;
 import android.util.Log;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.support.v4.app.FragmentActivity;
 import android.app.Activity;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.view.KeyEvent;
 import android.widget.ListView;
-import android.widget.ScrollView;
 import android.widget.ArrayAdapter;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -65,6 +63,7 @@ public class ConselActivity extends Activity {
         			v.setText("");
         			if( _out !=	null ){
         				try{
+        					cmd += "\t\n";
         					_out.write(cmd.getBytes());
         				}catch(Exception e){
         					new AlertDialog.Builder(ConselActivity.this).setTitle("Send failed")
