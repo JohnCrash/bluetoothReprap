@@ -3,6 +3,9 @@
 
     <string name="app_name">Reprap</string>
     <string name="title_setting_detail">setting Detail</string>
-    <string name="title_console">Console</string>
-    <string name="select_bluetooth">Select bluetooth device</string>
+    <string name="title_console">控制台</string>
+    <string name="select_bluetooth">请选择要连接的蓝牙设备</string>
+    <string name="connect_title">连接中</string>
+    <string name="connect_string">正在连接%s,请稍等...</string>
+    <string name="scan_bluetooth">搜索蓝牙设备...</string>
 </resources>

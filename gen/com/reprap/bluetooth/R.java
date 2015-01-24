@@ -46,6 +46,9 @@ public final class R {
     }
     public static final class string {
         public static final int app_name=0x7f040000;
+        public static final int connect_string=0x7f040005;
+        public static final int connect_title=0x7f040004;
+        public static final int scan_bluetooth=0x7f040006;
         public static final int select_bluetooth=0x7f040003;
         public static final int title_console=0x7f040002;
         public static final int title_setting_detail=0x7f040001;
