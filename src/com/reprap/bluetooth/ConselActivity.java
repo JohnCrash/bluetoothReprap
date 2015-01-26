@@ -63,7 +63,7 @@ public class ConselActivity extends Activity {
         			v.setText("");
         			if( _out !=	null ){
         				try{
-        					cmd += "\t\n";
+        					cmd += "\r\n";
         					_out.write(cmd.getBytes());
         				}catch(Exception e){
         					new AlertDialog.Builder(ConselActivity.this).setTitle("Send failed")
