@@ -62,7 +62,7 @@ public class settingListActivity extends FragmentActivity
     private static String TAG = "INFO";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-    	Log.d("Activity ","onCreate is called~");
+    	Log.d(TAG,"onCreate is called~");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.blue_enum_interface);
         setTitle(R.string.select_bluetooth);
@@ -144,26 +144,8 @@ public class settingListActivity extends FragmentActivity
 						return;
 					}					
 				}else if(device != null) {
-					_selectDeviceName = _arrayAdapter.getItem(position);
-	                AlertDialog dialog = new AlertDialog.Builder(settingListActivity.this)  
-	                .setIcon(android.R.drawable.btn_star_big_on) 
-	                .setTitle("Input PIN")
-	                .setPositiveButton("Cancel", _onClickPair)  
-	                .setNegativeButton("OK",  _onClickPair).create();
-	                _input = new EditText(settingListActivity.this);
-	                dialog.setView(_input);
-	                dialog.show();
-	                /*
-	                 *  show softboard
-	                 */
-	                _input.setFocusable(true);
-	                _input.requestFocus();
-	                (new  android.os.Handler()).postDelayed(new java.lang.Runnable() {
-	                	@Override
-	                		public void run() {
-                			InputMethodManager imm = (InputMethodManager)_input.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                			imm.showSoftInput(_input, InputMethodManager.SHOW_FORCED);
-	                	}},100);
+					/*not piared yet*/
+					pairDevice(device);
 				}else{
 					Log.d(TAG,"bluetooth device = null");
 				}
@@ -172,6 +154,28 @@ public class settingListActivity extends FragmentActivity
         startBluetoothDiscovery();
     }
     
+    private void pairByPin( BluetoothDevice device){
+		_selectDeviceName = device.getName();
+        AlertDialog dialog = new AlertDialog.Builder(settingListActivity.this)  
+        .setIcon(android.R.drawable.btn_star_big_on) 
+        .setTitle("Input PIN")
+        .setPositiveButton("Cancel", _onClickPair)  
+        .setNegativeButton("OK",  _onClickPair).create();
+        _input = new EditText(settingListActivity.this);
+        dialog.setView(_input);
+        dialog.show();
+        /*
+         *  show softboard
+         */
+        _input.setFocusable(true);
+        _input.requestFocus();
+        (new  android.os.Handler()).postDelayed(new java.lang.Runnable() {
+        	@Override
+        		public void run() {
+    			InputMethodManager imm = (InputMethodManager)_input.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+    			imm.showSoftInput(_input, InputMethodManager.SHOW_FORCED);
+        	}},100);
+    }
     private void pairDevice( BluetoothDevice device){
         try {
             Log.d("pairDevice()", "Start Pairing...");
