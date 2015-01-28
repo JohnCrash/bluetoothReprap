@@ -1,10 +1,11 @@
 package com.reprap.bluetooth;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.support.v4.app.FragmentActivity;
 import android.app.Activity;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -22,16 +23,19 @@ import java.io.OutputStream;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 
 public class ConselActivity extends Activity {
 	private EditText _input;
 	private ArrayAdapter<String> _list;
+	private ListView _listView;
 	private BluetoothDevice _device;
 	private BluetoothSocket _socket;
 	private InputStream _in;
 	private OutputStream _out;
 	private Thread _reciveThread;
 	private String TAG = "INFO";
+	private ProgressDialog _progressDialog;
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.consol_layout);
@@ -48,9 +52,9 @@ public class ConselActivity extends Activity {
         _device = device;
         setTitle(String.format("Console (%s)",device.getName()));
         _input = (EditText)findViewById(R.id.editText1);
-        ListView lv = (ListView)findViewById(R.id.listView1);
+        _listView = (ListView)findViewById(R.id.listView1);
         _list = new ArrayAdapter<String>( this,android.R.layout.simple_list_item_1);
-        lv.setAdapter(_list);
+        _listView.setAdapter(_list);
         _input.setOnEditorActionListener(new OnEditorActionListener(){
         	@Override
         	 public boolean onEditorAction(TextView v, int actionId, KeyEvent event){
@@ -59,6 +63,7 @@ public class ConselActivity extends Activity {
         			v.setText("");
         			if( _out !=	null ){
         				try{
+        					cmd += "\r\n";
         					_out.write(cmd.getBytes());
         				}catch(Exception e){
         					new AlertDialog.Builder(ConselActivity.this).setTitle("Send failed")
@@ -82,6 +87,20 @@ public class ConselActivity extends Activity {
 		})
 		.show(); 
     }
+    private static int CONNECT_ERROR_MSG = 1;
+    private static int ADD_READ_MSG = 2;
+    private Handler _handler = new Handler(){
+    	@Override
+    	public void handleMessage(final Message msg){
+    		if( msg.what == CONNECT_ERROR_MSG ){
+    			errorBox("Connect failed",(String)msg.obj);
+    		}else if(msg.what==ADD_READ_MSG){
+    			_list.add((String)msg.obj);
+    		//	_listView.setSelection(0);
+    		//	_listView.setSelectionAfterHeaderView();
+    		}
+    	}
+    };
     private void connectToDevice(){
     	try{
     		_reciveThread = new Thread(){
@@ -95,9 +114,16 @@ public class ConselActivity extends Activity {
 	    	    		_out = _socket.getOutputStream();
     				}catch(Exception e){
     					closeConnect();
-    					errorBox("Connect failed",e.toString());
+    					/*
+    					 * 这里直接弹出对话栏会出错
+    					 */
+    					Message msg = new Message();
+    					msg.what = CONNECT_ERROR_MSG;
+    					msg.obj = e.toString();
+    					_handler.sendMessage(msg);
     					return;
     				}
+    				_progressDialog.cancel();
     				Thread thisThread = Thread.currentThread();
     				while(thisThread==_reciveThread){
     					try{
@@ -106,16 +132,24 @@ public class ConselActivity extends Activity {
     						do{
     							int b = _in.read();
     							if( b == -1 )continue;
+    							if( b == '\t' )continue;
     							if( b == '\n' )
     								break;
     							line[i++] = (byte)b;
     						}while( i < 256  );
     						String buf = new String(line,0,i);
     						Log.d(TAG,buf);
-    						//_list.add(buf);
+    						/*
+    						 * 这里直接操作_list.add会出错
+    						 */
+        					Message msg = new Message();
+        					msg.what = ADD_READ_MSG;
+        					msg.obj = buf;
+        					_handler.sendMessage(msg);    						
     					}catch(java.io.IOException e){
     						closeConnect();
-    						errorBox("Receive failed",e.toString());
+    						Log.d(TAG,String.format("Thread exit,%s",e.toString()));
+    						return;
     					}
     				}
     			}
@@ -156,10 +190,14 @@ public class ConselActivity extends Activity {
 
     @Override
     public void onStart(){
+    	super.onStart();
+		_progressDialog = ProgressDialog.show(this,getText(R.string.connect_title),
+				String.format((String)getText(R.string.connect_string),_device.getName()));
     	connectToDevice();
     }
     @Override
     public void onStop(){
+    	super.onStop();
     	closeConnect();
     }
 }

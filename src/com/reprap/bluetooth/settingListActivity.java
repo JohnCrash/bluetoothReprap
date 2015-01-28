@@ -122,6 +122,7 @@ public class settingListActivity extends FragmentActivity
         registerReceiver(_receiver, filter);
         
         android.widget.Button button = (android.widget.Button)findViewById(R.id.button1);
+        button.setText(R.string.scan_bluetooth);
         button.setOnClickListener( new View.OnClickListener(){
         	@Override
         	public void onClick(View v ){    	
