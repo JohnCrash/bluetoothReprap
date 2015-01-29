@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AbsoluteLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <SeekBar
+        android:id="@+id/seekBar1"
+        android:layout_width="234dp"
+        android:layout_height="wrap_content"
+        android:layout_x="20dp"
+        android:layout_y="37dp" />
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="230dp"
+        android:layout_height="wrap_content"
+        android:layout_x="16dp"
+        android:layout_y="12dp"
+        android:text="温度" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="226dp"
+        android:layout_height="wrap_content"
+        android:layout_x="16dp"
+        android:layout_y="77dp"
+        android:text="风扇" />
+
+    <SeekBar
+        android:id="@+id/seekBar2"
+        android:layout_width="234dp"
+        android:layout_height="wrap_content"
+        android:layout_x="20dp"
+        android:layout_y="102dp" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="235dp"
+        android:layout_height="wrap_content"
+        android:layout_x="16dp"
+        android:layout_y="142dp"
+        android:text="挤出机1" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="238dp"
+        android:layout_height="wrap_content"
+        android:layout_x="16dp"
+        android:layout_y="208dp"
+        android:text="挤出机2" />
+
+    <SeekBar
+        android:id="@+id/seekBar4"
+        android:layout_width="234dp"
+        android:layout_height="wrap_content"
+        android:layout_x="20dp"
+        android:layout_y="231dp" />
+
+    <SeekBar
+        android:id="@+id/seekBar3"
+        android:layout_width="234dp"
+        android:layout_height="wrap_content"
+        android:layout_x="20dp"
+        android:layout_y="170dp" />
+
+    <Button
+        android:id="@+id/button5"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_x="260dp"
+        android:layout_y="212dp"
+        android:text="挤出" />
+
+    <Button
+        android:id="@+id/button1"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_x="260dp"
+        android:layout_y="151dp"
+        android:text="挤出" />
+
+    <Button
+        android:id="@+id/button10"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_x="260dp"
+        android:layout_y="90dp"
+        android:text="开动" />
+
+    <Button
+        android:id="@+id/button9"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_x="260dp"
+        android:layout_y="18dp"
+        android:text="加热" />
+
+    <Button
+        android:id="@+id/button11"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="98dp"
+        android:layout_height="wrap_content"
+        android:layout_x="208dp"
+        android:layout_y="270dp"
+        android:text="紧急停机" />
+
+    <Button
+        android:id="@+id/button3"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_x="127dp"
+        android:layout_y="270dp"
+        android:text="停止电机" />
+
+    <Button
+        android:id="@+id/button2"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="112dp"
+        android:layout_height="wrap_content"
+        android:layout_x="13dp"
+        android:layout_y="270dp"
+        android:text="原点G28" />
+
+    <Button
+        android:id="@+id/button7"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_x="13dp"
+        android:layout_y="322dp"
+        android:text="SD卡操作" />
+
+    <Button
+        android:id="@+id/button6"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="106dp"
+        android:layout_height="wrap_content"
+        android:layout_x="98dp"
+        android:layout_y="322dp"
+        android:text="校准" />
+
+    <Button
+        android:id="@+id/button4"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_x="213dp"
+        android:layout_y="322dp"
+        android:text="命令控制台" />
+
+    <TextView
+        android:id="@+id/textView5"
+        android:layout_width="294dp"
+        android:layout_height="wrap_content"
+        android:layout_x="11dp"
+        android:layout_y="379dp" />
+
+    <TextView
+        android:id="@+id/textView6"
+        android:layout_width="294dp"
+        android:layout_height="wrap_content"
+        android:layout_x="11dp"
+        android:layout_y="400dp" />
+
+    <TextView
+        android:id="@+id/textView7"
+        android:layout_width="292dp"
+        android:layout_height="wrap_content"
+        android:layout_x="11dp"
+        android:layout_y="424dp" />
+
+</AbsoluteLayout>

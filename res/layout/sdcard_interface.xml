@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AbsoluteLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_x="5dp"
+        android:layout_y="6dp"
+        android:text="文件列表" />
+
+    <ListView
+        android:id="@+id/listView1"
+        android:layout_width="match_parent"
+        android:layout_height="344dp"
+        android:layout_x="3dp"
+        android:layout_y="28dp" >
+    </ListView>
+
+    <Button
+        android:id="@+id/button1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_x="2dp"
+        android:layout_y="410dp"
+        android:text="删除" />
+
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="102dp"
+        android:layout_height="wrap_content"
+        android:layout_x="64dp"
+        android:layout_y="410dp"
+        android:text="打印" />
+
+    <Button
+        android:id="@+id/button4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_x="254dp"
+        android:layout_y="410dp"
+        android:text="暂停" />
+
+    <Button
+        android:id="@+id/button3"
+        android:layout_width="86dp"
+        android:layout_height="wrap_content"
+        android:layout_x="168dp"
+        android:layout_y="410dp"
+        android:text="上传" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="296dp"
+        android:layout_height="wrap_content"
+        android:layout_x="10dp"
+        android:layout_y="384dp" />
+
+</AbsoluteLayout>

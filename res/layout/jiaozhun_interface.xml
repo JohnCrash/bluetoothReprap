@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AbsoluteLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <Button
+        android:id="@+id/button1"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="135dp"
+        android:layout_height="wrap_content"
+        android:layout_x="8dp"
+        android:layout_y="403dp"
+        android:text="平面校准G29" />
+
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_x="168dp"
+        android:layout_y="404dp"
+        android:text="三角校准M329" />
+
+    <RadioButton
+        android:id="@+id/radioButton1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_x="20dp"
+        android:layout_y="16dp"
+        android:text="X" />
+
+    <RadioButton
+        android:id="@+id/radioButton2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_x="88dp"
+        android:layout_y="16dp"
+        android:text="Y" />
+
+    <RadioButton
+        android:id="@+id/radioButton4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_x="224dp"
+        android:layout_y="16dp"
+        android:text="C" />
+
+    <RadioButton
+        android:id="@+id/radioButton3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_x="159dp"
+        android:layout_y="16dp"
+        android:text="Z" />
+
+    <Button
+        android:id="@+id/button5"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_x="20dp"
+        android:layout_y="63dp"
+        android:text="100mm" />
+
+    <Button
+        android:id="@+id/button7"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_x="224dp"
+        android:layout_y="66dp"
+        android:text="30mm" />
+
+    <Button
+        android:id="@+id/button6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_x="121dp"
+        android:layout_y="64dp"
+        android:text="50mm" />
+
+    <Button
+        android:id="@+id/button8"
+        android:layout_width="140dp"
+        android:layout_height="wrap_content"
+        android:layout_x="166dp"
+        android:layout_y="354dp"
+        android:text="回原点G28" />
+
+    <Button
+        android:id="@+id/button3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_x="9dp"
+        android:layout_y="352dp"
+        android:text="保存设置M500" />
+
+    <Button
+        android:id="@+id/button4"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="176dp"
+        android:layout_height="wrap_content"
+        android:layout_x="9dp"
+        android:layout_y="298dp"
+        android:text="限位开关状态(M114)" />
+
+</AbsoluteLayout>
