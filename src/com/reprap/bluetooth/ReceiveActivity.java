@@ -15,13 +15,16 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class ReceiveActivity extends Activity  {
-	private BluetoothDevice _device;
-	private BluetoothSocket _socket;
-	private InputStream _in;
-	private OutputStream _out;
-	private Thread _reciveThread;
+	private static BluetoothDevice _device;
+	private static BluetoothSocket _socket;
+	private static InputStream _in;
+	private static OutputStream _out;
+	private static Thread _reciveThread;
 	private String TAG = "INFO";
-	
+    private static final int CONNECT_ERROR_MSG = 1;
+    private static final  int ADD_READ_MSG = 2;	 
+    private static Handler _handler;
+    
 	public BluetoothDevice getBluetoothDevice(){
 		return _device;
 	}
@@ -56,27 +59,27 @@ public class ReceiveActivity extends Activity  {
 			setTitle(String.format("Console (%s) - not paired",device.getName()));
 			errorBox(getText(R.string.error).toString(),getText(R.string.lanuch_error).toString());
 		    return;
-		 }		 
-		 _device = device;
-		 _in = settingListActivity.getInputStream();
-		 _out = settingListActivity.getOutputStream();
-		 _socket = settingListActivity.getBluetoothSocket();
+		 }
+		_handler = new Handler(){
+		    	@Override
+		    	public void handleMessage(final Message msg){
+		    		switch( msg.what ){
+		    		case CONNECT_ERROR_MSG:
+		    			errorBox(getText(R.string.error).toString(),(String)msg.obj);
+		    			break;
+		    		case ADD_READ_MSG:
+		    			receiver((byte [])msg.obj);
+		    			break;
+		    		}
+		    	}
+		    };		
+		if(_reciveThread==null){
+			_device = device;
+			_in = settingListActivity.getInputStream();
+			_out = settingListActivity.getOutputStream();
+			_socket = settingListActivity.getBluetoothSocket();
+		}
 	 }
-	    private static final int CONNECT_ERROR_MSG = 1;
-	    private static final  int ADD_READ_MSG = 2;	 
-	    private Handler _handler = new Handler(){
-	    	@Override
-	    	public void handleMessage(final Message msg){
-	    		switch( msg.what ){
-	    		case CONNECT_ERROR_MSG:
-	    			errorBox(getText(R.string.error).toString(),(String)msg.obj);
-	    			break;
-	    		case ADD_READ_MSG:
-	    			receiver((byte [])msg.obj);
-	    			break;
-	    		}
-	    	}
-	    };
 	    private void errorBox(String title,String info){
 			new AlertDialog.Builder(ReceiveActivity.this).setTitle(title)
 			.setMessage(info)
@@ -89,6 +92,7 @@ public class ReceiveActivity extends Activity  {
 			.show(); 
 	    }
 	    private void sendMessage( int id,Object obj){
+	    	if( _handler == null )return;
 			Message msg = new Message();
 			msg.what = id;
 			msg.obj = obj;
@@ -96,6 +100,8 @@ public class ReceiveActivity extends Activity  {
 	    }
 	   private void reciverThread(){
 	    	try{
+	    		if( _reciveThread != null )
+	    			return;
 	    		_reciveThread = new Thread(){
 	    			@Override
 	    			public void run(){
@@ -108,7 +114,7 @@ public class ReceiveActivity extends Activity  {
 	    							int b = _in.read();
 	    							if( _reciveThread == null ){
 	    								Log.d(TAG,"reciverThread exit");
-	    								break; 
+	    								return; 
 	    							}
 	    							if( b == -1 )continue;
 	    							if( b == '\t' )continue;
@@ -126,9 +132,9 @@ public class ReceiveActivity extends Activity  {
 	    							for( int j=0;j<i;j++)buffer[j] = line[j];
 	    							sendMessage(ADD_READ_MSG,buffer);
 	    						}
-	    					}catch(java.io.IOException e){
+	    					}catch(Exception e){
 	    						Log.d(TAG,String.format("Thread exit,%s",e.toString()));
-	    						sendMessage( CONNECT_ERROR_MSG,e.toString());
+	    						//sendMessage( CONNECT_ERROR_MSG,e.toString());
 	    						return;
 	    					}
 	    				}
@@ -147,7 +153,7 @@ public class ReceiveActivity extends Activity  {
 	    }	   
 	    @Override
 	    public void onStop(){
-	    	_reciveThread = null;
+	    	_handler = null;
 	    	super.onStop();
 	    }	   
 }

@@ -8,14 +8,14 @@ import android.view.KeyEvent;
 import android.widget.ListView;
 import android.widget.ArrayAdapter;
 import android.widget.AdapterView;
-
 import android.view.View;
+import java.lang.System;
 
 public class ConselActivity extends ReceiveActivity {
 	private EditText _input;
 	private ArrayAdapter<String> _list;
 	private ListView _listView;
-	
+	private long _lastCmdTime = 0;
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.consol_layout);
@@ -29,8 +29,12 @@ public class ConselActivity extends ReceiveActivity {
         	@Override
         	public void onItemClick(AdapterView<?> parent,View view,int position,long id){
         		String cmd = _list.getItem(position);
-        		cmd += "\r\n";
+        		int i = cmd.indexOf(" (");
+        		if( i != -1 )
+        			cmd = cmd.substring(0,i);
+        		_lastCmdTime = System.currentTimeMillis();
         		_list.add(cmd);
+        		cmd += "\r\n";
         		write( cmd.getBytes() );
         }});
         _input.setOnEditorActionListener(new OnEditorActionListener(){
@@ -39,9 +43,10 @@ public class ConselActivity extends ReceiveActivity {
         		String cmd = v.getText().toString();
         		if(cmd.length()>0){ 
         			v.setText("");
+        			_lastCmdTime = System.currentTimeMillis();
+        			_list.add(cmd);
      				cmd += "\r\n";
        				write(cmd.getBytes());
-        			_list.add(cmd);
         		}
         		return true;
         	}
@@ -49,6 +54,14 @@ public class ConselActivity extends ReceiveActivity {
     }
     @Override
     public void receiver( byte [] buffer ){
-    	_list.add(new String(buffer,0,buffer.length));
+    	if( System.currentTimeMillis()-_lastCmdTime < 1000 ){
+    		String s = _list.getItem(_list.getCount()-1);
+    		String ns = String.format("%s (%s)",s,new String(buffer,0,buffer.length));
+    		_list.remove(s);
+    		_list.add(ns);
+    		_lastCmdTime = 0;
+    	}else{
+    		_list.add(new String(buffer,0,buffer.length) );
+    	}
     }
 }

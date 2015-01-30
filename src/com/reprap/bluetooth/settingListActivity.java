@@ -191,9 +191,22 @@ public class settingListActivity extends FragmentActivity
 						(device.getBondState() == BluetoothDevice.BOND_BONDED || device.getBondState()==BluetoothDevice.BOND_BONDING) ){
 					//ConselActivity
 					_bluetoothAdapter.cancelDiscovery();
-					closeConnect();
-					_device = device;
-					connectToDevice( device );					
+					if( _socket !=null ){
+						try{
+							if( _in == null )
+								_in = _socket.getInputStream();
+							if( _out == null )
+								_out = _socket.getOutputStream();
+						}catch(Exception e){
+							Log.d(TAG,e.toString());
+							sendMessage(CONNECT_ERROR_MSG,e.toString());
+						}
+						sendMessage(CONNECT_SUCCESS_MSG,null);
+					}else{
+						closeConnect();
+						_device = device;
+						connectToDevice( device );
+					}
 				}else if(device != null) {
 					/*not piared yet*/
 					pairDevice(device);
@@ -242,8 +255,7 @@ public class settingListActivity extends FragmentActivity
     		sendMessage(CONNECT_ERROR_MSG,e.toString());
     	}
     }
-    static public void closeConnect(){
-    	_reciveThread = null;
+    static public void closeStream(){
     	if( _in != null )
     	{
     		try{
@@ -257,7 +269,11 @@ public class settingListActivity extends FragmentActivity
     			_out.close();
     		}catch(Exception e){}
     		_out = null;
-    	}
+    	}    	
+    }
+    static public void closeConnect(){
+    	_reciveThread = null;
+    	closeStream();
     	if( _socket != null )
     	{
     		try{
@@ -421,12 +437,12 @@ public class settingListActivity extends FragmentActivity
     }
     @Override
     public void onStop(){
-    	closeConnect();
     	super.onStop();
     	Log.d(TAG,"onStop is called");
     }
     @Override
     public void onDestroy(){
+    	closeConnect();
     	Log.d(TAG,"onDestroy is called");
     	super.onDestroy();
     }

@@ -36,7 +36,7 @@ public class CommandActitivy extends ReceiveActivity {
 		}
 	}
 	@Override
-	public void receiver( byte [] buf ){
+	public void receiver( byte [] line ){
 		
 	}
     protected void onCreate(Bundle savedInstanceState) {
