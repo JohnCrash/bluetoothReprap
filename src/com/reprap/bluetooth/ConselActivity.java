@@ -17,10 +17,10 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.bluetooth.BluetoothSocket;
-
+import android.widget.AdapterView;
 import java.io.InputStream;
 import java.io.OutputStream;
-
+import android.view.View;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -55,6 +55,20 @@ public class ConselActivity extends Activity {
         _listView = (ListView)findViewById(R.id.listView1);
         _list = new ArrayAdapter<String>( this,android.R.layout.simple_list_item_1);
         _listView.setAdapter(_list);
+        _listView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+        	@Override
+        	public void onItemClick(AdapterView<?> parent,View view,int position,long id){
+        		if( _out != null ){
+        			String cmd = _list.getItem(position);
+        			cmd += "\r\n";
+        			_list.add(cmd);
+        			try{
+        				_out.write(cmd.getBytes());
+        			}catch(Exception e){         					
+        				new AlertDialog.Builder(ConselActivity.this).setTitle("Send failed")
+    					.setMessage(e.toString()).show();}
+        		}
+        }});
         _input.setOnEditorActionListener(new OnEditorActionListener(){
         	@Override
         	 public boolean onEditorAction(TextView v, int actionId, KeyEvent event){

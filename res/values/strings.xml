@@ -8,4 +8,7 @@
     <string name="connect_title">连接中</string>
     <string name="connect_string">正在连接%s,请稍等...</string>
     <string name="scan_bluetooth">搜索蓝牙设备...</string>
+    <string name="title_calibration">校准打印机</string>
+    <string name="title_command">命令</string>
+    <string name="title_sdoperator">SD卡操作</string>
 </resources>
