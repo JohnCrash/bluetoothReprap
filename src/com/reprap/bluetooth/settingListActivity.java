@@ -2,6 +2,8 @@ package com.reprap.bluetooth;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.bluetooth.BluetoothAdapter;
@@ -11,6 +13,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.IntentFilter;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Set;
 
 import android.view.View;
@@ -22,6 +26,7 @@ import java.util.HashMap;
 import android.widget.AdapterView;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.widget.EditText;
 import android.view.inputmethod.InputMethodManager;
 import android.bluetooth.BluetoothSocket;
@@ -58,8 +63,57 @@ public class settingListActivity extends FragmentActivity
     private HashMap<String,BluetoothDevice> _DeviceByName;
     private String _selectDeviceName;
     private EditText _input;
-    private BluetoothSocket _socket;
+    private static BluetoothDevice _device;
+	private static BluetoothSocket _socket;
+	private static InputStream _in;
+	private static OutputStream _out;    
+	private Thread _reciveThread;
     private static String TAG = "INFO";
+    private static final int CONNECT_ERROR_MSG = 1;
+    private static final int CONNECT_SUCCESS_MSG = 2;
+	private ProgressDialog _progressDialog;
+	
+    public static InputStream getInputStream(){
+    	return _in;
+    }
+    public static OutputStream getOutputStream(){
+    	return _out;
+    }
+    public static BluetoothSocket getBluetoothSocket(){
+    	return _socket;
+    }
+    public static BluetoothDevice getBluetoothDevice(){
+    	return _device;
+    }
+    private void errorBox(String title,String info){
+		new AlertDialog.Builder(settingListActivity.this).setTitle(title)
+		.setMessage(info)
+		.setNegativeButton("Close", new DialogInterface.OnClickListener(){
+			@Override
+			public void onClick(DialogInterface dialog, int which){
+				settingListActivity.this.finish();
+			}
+		})
+		.show(); 
+    }
+    private Handler _handler = new Handler(){
+    	@Override
+    	public void handleMessage(final Message msg){
+    		switch(msg.what){
+    		case CONNECT_ERROR_MSG :
+    			errorBox("Connect failed",(String)msg.obj);
+    			break;
+    		case CONNECT_SUCCESS_MSG:
+				Intent intent = new Intent(settingListActivity.this,ConselActivity.class);
+				if( intent != null ){
+					intent.putExtra("device",_device);
+					startActivity(intent);
+					return;
+				}    			
+    			break;
+    		}
+    	}
+    };    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
     	Log.d(TAG,"onCreate is called~");
@@ -135,15 +189,11 @@ public class settingListActivity extends FragmentActivity
 				BluetoothDevice device = _DeviceByName.get(_arrayAdapter.getItem(position));				
 				if( device != null &&
 						(device.getBondState() == BluetoothDevice.BOND_BONDED || device.getBondState()==BluetoothDevice.BOND_BONDING) ){
-					//do connect...
 					//ConselActivity
 					_bluetoothAdapter.cancelDiscovery();
-					Intent intent = new Intent(settingListActivity.this,ConselActivity.class);
-					if( intent != null ){
-						intent.putExtra("device",device);
-						startActivity(intent);
-						return;
-					}					
+					closeConnect();
+					_device = device;
+					connectToDevice( device );					
 				}else if(device != null) {
 					/*not piared yet*/
 					pairDevice(device);
@@ -153,6 +203,68 @@ public class settingListActivity extends FragmentActivity
 			}
 		});
         startBluetoothDiscovery();
+    }
+    private void sendMessage( int id,Object obj){
+		Message msg = new Message();
+		msg.what = id;
+		msg.obj = obj;
+		_handler.sendMessage(msg);
+    }
+    private void connectToDevice(final BluetoothDevice device){
+    	try{
+    		_progressDialog = ProgressDialog.show(this,getText(R.string.connect_title),
+    				String.format((String)getText(R.string.connect_string),_device.getName()));    		
+    		_reciveThread = new Thread(){
+    			@Override
+    			public void run(){
+    				try{
+	    	    		java.lang.reflect.Method m = device.getClass().getMethod("createInsecureRfcommSocket", new Class[] {int.class});
+	    	    		_socket = (BluetoothSocket)m.invoke(device,1);
+	    	    		_socket.connect();
+	    	    		_in = _socket.getInputStream();
+	    	    		_out = _socket.getOutputStream();
+	    	    		_progressDialog.cancel();
+    				}catch(Exception e){
+    					closeConnect();
+    					/*
+    					 * 这里直接弹出对话栏会出错
+    					 */
+    					sendMessage(CONNECT_ERROR_MSG,e.toString());
+    					return;
+    				}
+    				sendMessage(CONNECT_SUCCESS_MSG,null);
+    			}
+    		};
+    		_reciveThread.start();
+    	}catch(Exception e){
+    		closeConnect();
+    		Log.d(TAG,e.toString());
+    		sendMessage(CONNECT_ERROR_MSG,e.toString());
+    	}
+    }
+    private void closeConnect(){
+    	_reciveThread = null;
+    	if( _in != null )
+    	{
+    		try{
+    			_in.close();
+    		}catch(Exception e){}
+    		_in = null;
+    	}
+    	if( _out != null )
+    	{
+    		try{
+    			_out.close();
+    		}catch(Exception e){}
+    		_out = null;
+    	}
+    	if( _socket != null )
+    	{
+    		try{
+    		_socket.close();
+    		}catch(Exception e ){}
+    		_socket = null;
+    	}
     }
     
     private void pairByPin( BluetoothDevice device){
@@ -309,6 +421,7 @@ public class settingListActivity extends FragmentActivity
     }
     @Override
     public void onStop(){
+    	closeConnect();
     	super.onStop();
     	Log.d(TAG,"onStop is called");
     }

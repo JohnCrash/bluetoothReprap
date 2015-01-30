@@ -11,4 +11,5 @@
     <string name="title_calibration">校准打印机</string>
     <string name="title_command">命令</string>
     <string name="title_sdoperator">SD卡操作</string>
+    <string name="error">出错了</string>
 </resources>

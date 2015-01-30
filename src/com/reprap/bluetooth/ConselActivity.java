@@ -18,8 +18,10 @@ import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.bluetooth.BluetoothSocket;
 import android.widget.AdapterView;
+
 import java.io.InputStream;
 import java.io.OutputStream;
+
 import android.view.View;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -35,7 +37,8 @@ public class ConselActivity extends Activity {
 	private OutputStream _out;
 	private Thread _reciveThread;
 	private String TAG = "INFO";
-	private ProgressDialog _progressDialog;
+
+	
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.consol_layout);
@@ -50,6 +53,10 @@ public class ConselActivity extends Activity {
         	return;
         }
         _device = device;
+        _in = settingListActivity.getInputStream();
+        _out = settingListActivity.getOutputStream();
+        _socket = settingListActivity.getBluetoothSocket();
+        
         setTitle(String.format("Console (%s)",device.getName()));
         _input = (EditText)findViewById(R.id.editText1);
         _listView = (ListView)findViewById(R.id.listView1);
@@ -101,47 +108,36 @@ public class ConselActivity extends Activity {
 		})
 		.show(); 
     }
-    private static int CONNECT_ERROR_MSG = 1;
-    private static int ADD_READ_MSG = 2;
+    private static final int CONNECT_ERROR_MSG = 1;
+    private static final  int ADD_READ_MSG = 2;
     private Handler _handler = new Handler(){
     	@Override
     	public void handleMessage(final Message msg){
-    		if( msg.what == CONNECT_ERROR_MSG ){
-    			errorBox("Connect failed",(String)msg.obj);
-    		}else if(msg.what==ADD_READ_MSG){
+    		switch( msg.what ){
+    		case CONNECT_ERROR_MSG:
+    			errorBox(getText(R.string.error).toString(),(String)msg.obj);
+    			break;
+    		case ADD_READ_MSG:
     			_list.add((String)msg.obj);
-    		//	_listView.setSelection(0);
-    		//	_listView.setSelectionAfterHeaderView();
+    			break;
     		}
     	}
     };
-    private void connectToDevice(){
+    private void sendMessage( int id,Object obj){
+		Message msg = new Message();
+		msg.what = id;
+		msg.obj = obj;
+		_handler.sendMessage(msg);
+    }
+    private void reciverThread(){
     	try{
+    		final byte [] line = new byte[256];
     		_reciveThread = new Thread(){
     			@Override
     			public void run(){
-    				try{
-	    	    		java.lang.reflect.Method m = _device.getClass().getMethod("createInsecureRfcommSocket", new Class[] {int.class});
-	    	    		_socket = (BluetoothSocket)m.invoke(_device,1);
-	    	    		_socket.connect();
-	    	    		_in = _socket.getInputStream();
-	    	    		_out = _socket.getOutputStream();
-    				}catch(Exception e){
-    					closeConnect();
-    					/*
-    					 * 这里直接弹出对话栏会出错
-    					 */
-    					Message msg = new Message();
-    					msg.what = CONNECT_ERROR_MSG;
-    					msg.obj = e.toString();
-    					_handler.sendMessage(msg);
-    					return;
-    				}
-    				_progressDialog.cancel();
     				Thread thisThread = Thread.currentThread();
     				while(thisThread==_reciveThread){
     					try{
-    						byte [] line = new byte[256];
     						int i = 0;
     						do{
     							int b = _in.read();
@@ -156,13 +152,10 @@ public class ConselActivity extends Activity {
     						/*
     						 * 这里直接操作_list.add会出错
     						 */
-        					Message msg = new Message();
-        					msg.what = ADD_READ_MSG;
-        					msg.obj = buf;
-        					_handler.sendMessage(msg);    						
+    						sendMessage(ADD_READ_MSG,buf);
     					}catch(java.io.IOException e){
-    						closeConnect();
     						Log.d(TAG,String.format("Thread exit,%s",e.toString()));
+    						sendMessage( CONNECT_ERROR_MSG,e.toString());
     						return;
     					}
     				}
@@ -170,48 +163,19 @@ public class ConselActivity extends Activity {
     		};
     		_reciveThread.start();
     	}catch(Exception e){
-    		closeConnect();
     		Log.d(TAG,e.toString());
-    		//messagebox
-    		new AlertDialog.Builder(this).setTitle("Connect failed")
-    			.setMessage(e.toString()).show();
-    	}
-    }
-    private void closeConnect(){
-    	_reciveThread = null;
-    	if( _in != null )
-    	{
-    		try{
-    			_in.close();
-    		}catch(Exception e){}
-    		_in = null;
-    	}
-    	if( _out != null )
-    	{
-    		try{
-    			_out.close();
-    		}catch(Exception e){}
-    		_out = null;
-    	}
-    	if( _socket != null )
-    	{
-    		try{
-    		_socket.close();
-    		}catch(Exception e ){}
-    		_socket = null;
+    		sendMessage( CONNECT_ERROR_MSG,e.toString());
     	}
     }
 
     @Override
     public void onStart(){
     	super.onStart();
-		_progressDialog = ProgressDialog.show(this,getText(R.string.connect_title),
-				String.format((String)getText(R.string.connect_string),_device.getName()));
-    	connectToDevice();
+    	reciverThread();
     }
     @Override
     public void onStop(){
+    	_reciveThread = null;
     	super.onStop();
-    	closeConnect();
     }
 }
