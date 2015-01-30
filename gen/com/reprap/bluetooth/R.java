@@ -78,6 +78,7 @@ public final class R {
         public static final int connect_string=0x7f040005;
         public static final int connect_title=0x7f040004;
         public static final int error=0x7f04000a;
+        public static final int lanuch_error=0x7f04000c;
         public static final int scan_bluetooth=0x7f040006;
         public static final int select_bluetooth=0x7f040003;
         public static final int title_calibration=0x7f040007;
@@ -85,6 +86,7 @@ public final class R {
         public static final int title_console=0x7f040002;
         public static final int title_sdoperator=0x7f040009;
         public static final int title_setting_detail=0x7f040001;
+        public static final int write_error=0x7f04000b;
     }
     public static final class style {
         /** 

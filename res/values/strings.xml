@@ -12,4 +12,6 @@
     <string name="title_command">命令</string>
     <string name="title_sdoperator">SD卡操作</string>
     <string name="error">出错了</string>
+    <string name="write_error">写入数据出错</string>
+    <string name="lanuch_error">启动错误，没找到设备信息</string>
 </resources>
