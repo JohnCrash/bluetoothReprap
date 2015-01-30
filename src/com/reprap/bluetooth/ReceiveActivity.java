@@ -49,8 +49,7 @@ public class ReceiveActivity extends Activity  {
 	}
 	 protected void onCreate(Bundle savedInstanceState) {
 		 super.onCreate(savedInstanceState);
-		Intent intent = getIntent();
-		BluetoothDevice device = (BluetoothDevice)intent.getExtras().getParcelable("device");
+		BluetoothDevice device = settingListActivity.getBluetoothDevice();
 		if( device ==null){
 			Log.d(TAG,"Console activity can't launch,devic == null");
 		}

@@ -104,7 +104,7 @@ public class settingListActivity extends FragmentActivity
     			errorBox("Connect failed",(String)msg.obj);
     			break;
     		case CONNECT_SUCCESS_MSG:
-				Intent intent = new Intent(settingListActivity.this,ConselActivity.class);
+				Intent intent = new Intent(settingListActivity.this,CommandActitivy.class);
 				if( intent != null ){
 					intent.putExtra("device",_device);
 					startActivity(intent);
