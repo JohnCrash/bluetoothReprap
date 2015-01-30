@@ -67,7 +67,7 @@ public class settingListActivity extends FragmentActivity
 	private static BluetoothSocket _socket;
 	private static InputStream _in;
 	private static OutputStream _out;    
-	private Thread _reciveThread;
+	private static Thread _reciveThread;
     private static String TAG = "INFO";
     private static final int CONNECT_ERROR_MSG = 1;
     private static final int CONNECT_SUCCESS_MSG = 2;
@@ -242,7 +242,7 @@ public class settingListActivity extends FragmentActivity
     		sendMessage(CONNECT_ERROR_MSG,e.toString());
     	}
     }
-    private void closeConnect(){
+    static public void closeConnect(){
     	_reciveThread = null;
     	if( _in != null )
     	{

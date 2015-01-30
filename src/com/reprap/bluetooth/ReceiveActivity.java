@@ -39,6 +39,9 @@ public class ReceiveActivity extends Activity  {
 		}
 		return true;
 	}
+	public boolean writeString( String s ){
+		return write(s.getBytes());
+	}
 	public void receiver( byte [] buf ){
 	}
 	 protected void onCreate(Bundle savedInstanceState) {
