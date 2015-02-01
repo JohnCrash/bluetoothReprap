@@ -152,7 +152,6 @@ public class ReceiveActivity extends Activity  {
 	    }	   
 	    @Override
 	    public void onStop(){
-	    	_handler = null;
 	    	super.onStop();
 	    }	   
 }

@@ -1,105 +1,121 @@
 <?xml version="1.0" encoding="utf-8"?>
-<AbsoluteLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
 
-    <Button
-        android:id="@+id/button1"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="135dp"
-        android:layout_height="wrap_content"
-        android:layout_x="8dp"
-        android:layout_y="403dp"
-        android:text="平面校准G29" />
-
-    <Button
-        android:id="@+id/button2"
+    <TextView
+        android:id="@+id/textView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_x="168dp"
-        android:layout_y="404dp"
-        android:text="三角校准M329" />
+        android:text="限位开关状态" />
 
-    <RadioButton
-        android:id="@+id/radioButton1"
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+        <RadioButton
+            android:id="@+id/radioButton1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="X" />
+
+        <RadioButton
+            android:id="@+id/radioButton2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Y" />
+
+        <RadioButton
+            android:id="@+id/radioButton3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Z" />
+
+        <RadioButton
+            android:id="@+id/radioButton4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="C" />
+
+    </LinearLayout>
+
+    <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_x="20dp"
-        android:layout_y="16dp"
-        android:text="X" />
+        android:layout_height="wrap_content" >
 
-    <RadioButton
-        android:id="@+id/radioButton2"
+        <Button
+            android:id="@+id/button1"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="135dp"
+            android:layout_height="wrap_content"
+            android:text="平面校准G29" />
+
+        <Button
+            android:id="@+id/button2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="三角校准M329" />
+
+    </LinearLayout>
+
+    <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_x="88dp"
-        android:layout_y="16dp"
-        android:text="Y" />
+        android:layout_height="wrap_content" >
 
-    <RadioButton
-        android:id="@+id/radioButton4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_x="224dp"
-        android:layout_y="16dp"
-        android:text="C" />
+        <Button
+            android:id="@+id/button5"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="100mm" />
 
-    <RadioButton
-        android:id="@+id/radioButton3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_x="159dp"
-        android:layout_y="16dp"
-        android:text="Z" />
+        <Button
+            android:id="@+id/button7"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="30mm" />
 
-    <Button
-        android:id="@+id/button5"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_x="20dp"
-        android:layout_y="63dp"
-        android:text="100mm" />
+        <Button
+            android:id="@+id/button6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="50mm" />
 
-    <Button
-        android:id="@+id/button7"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_x="224dp"
-        android:layout_y="66dp"
-        android:text="30mm" />
+    </LinearLayout>
 
-    <Button
-        android:id="@+id/button6"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_x="121dp"
-        android:layout_y="64dp"
-        android:text="50mm" />
+        android:orientation="horizontal" >
 
-    <Button
-        android:id="@+id/button8"
-        android:layout_width="140dp"
-        android:layout_height="wrap_content"
-        android:layout_x="166dp"
-        android:layout_y="354dp"
-        android:text="回原点G28" />
+        <Button
+            android:id="@+id/button8"
+            android:layout_width="140dp"
+            android:layout_height="wrap_content"
+            android:text="回原点G28" />
 
-    <Button
-        android:id="@+id/button3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_x="9dp"
-        android:layout_y="352dp"
-        android:text="保存设置M500" />
+        <Button
+            android:id="@+id/button3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="保存设置M500" />
+
+    </LinearLayout>
 
     <Button
         android:id="@+id/button4"
         style="?android:attr/buttonStyleSmall"
         android:layout_width="176dp"
         android:layout_height="wrap_content"
-        android:layout_x="9dp"
-        android:layout_y="298dp"
         android:text="限位开关状态(M114)" />
 
-</AbsoluteLayout>
+    <Button
+        android:id="@+id/button9"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="紧急停机" />
+
+</LinearLayout>
