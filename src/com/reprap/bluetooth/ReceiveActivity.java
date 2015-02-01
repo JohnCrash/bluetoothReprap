@@ -1,5 +1,6 @@
 package com.reprap.bluetooth;
 
+import android.support.v4.app.FragmentActivity;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.os.Bundle;

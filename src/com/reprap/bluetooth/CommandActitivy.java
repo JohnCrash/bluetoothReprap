@@ -62,6 +62,7 @@ public class CommandActitivy extends ReceiveActivity {
 				Intent intent = new Intent(CommandActitivy.this,SDOperatorActivity.class);
 				if( intent != null ){
 					startActivity(intent);
+					//CommandActitivy.this.startActivityFromFragment(CommandActitivy.this,intent,0);
 				}  
 			}
 			break;

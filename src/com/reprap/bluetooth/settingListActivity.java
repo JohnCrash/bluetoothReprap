@@ -30,6 +30,7 @@ import android.app.ProgressDialog;
 import android.widget.EditText;
 import android.view.inputmethod.InputMethodManager;
 import android.bluetooth.BluetoothSocket;
+//import android.app.Activity;
 
 /**
  * An activity representing a list of Items. This activity

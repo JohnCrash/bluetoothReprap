@@ -16,6 +16,6 @@
         android:layout_width="match_parent"
         android:layout_height="44dp"
         android:layout_weight="0.30"
-        android:text="scan" />
+        android:text="搜索附近的蓝牙设备" />
 
 </LinearLayout>
