@@ -36,7 +36,7 @@
         <activity
             android:name="com.reprap.bluetooth.ConselActivity"
             android:label="@string/title_console"
-            android:parentActivityName="com.reprap.bluetooth.ConselActivity" >
+            android:parentActivityName="com.reprap.bluetooth.CommandActitivy" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.reprap.bluetooth.ConselActivity" />
@@ -44,7 +44,7 @@
         <activity
             android:name="com.reprap.bluetooth.CalibrationActivity"
             android:label="@string/title_calibration"
-            android:parentActivityName="com.reprap.bluetooth.CalibrationActivity" >
+            android:parentActivityName="com.reprap.bluetooth.CommandActitivy" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.reprap.bluetooth.CalibrationActivity" />
@@ -52,7 +52,7 @@
         <activity
             android:name="com.reprap.bluetooth.CommandActitivy"
             android:label="@string/title_command"
-            android:parentActivityName="com.reprap.bluetooth.CommandActitivy" >
+            android:parentActivityName="com.reprap.bluetooth.settingListActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.reprap.bluetooth.ConselActivity" />
@@ -60,7 +60,7 @@
         <activity
             android:name="com.reprap.bluetooth.SDOperatorActivity"
             android:label="@string/title_sdoperator"
-            android:parentActivityName="com.reprap.bluetooth.SDOperatorActivity" >
+            android:parentActivityName="com.reprap.bluetooth.CommandActitivy" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.reprap.bluetooth.ConselActivity" />
