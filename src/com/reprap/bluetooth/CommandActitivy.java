@@ -5,6 +5,9 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.content.res.Configuration;
+import android.util.Log;
 
 public class CommandActitivy extends ReceiveActivity {
 	static final int g28 = R.id.button2;
@@ -29,6 +32,8 @@ public class CommandActitivy extends ReceiveActivity {
 	Button _fanButton;
 	Button _extractor1Button;
 	Button _extractor2Button;
+	LinearLayout _linear1;
+	LinearLayout _linear2;
 	protected void initAllEvent(){
 		for( int i = 0;i < button_id.length;i++ ){
 			final int id = button_id[i];
@@ -93,10 +98,22 @@ public class CommandActitivy extends ReceiveActivity {
 		_text2.setText(_text3.getText());
 		_text3.setText(s);
 	}
+	private View [] _buts;
+	private int but_state = 0;
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.command_interface);
         initAllEvent();
+        /*
+         * 在横屏的时候屏幕比较长，将按钮放置在一个tablerow中
+         */
+        _linear1 = (LinearLayout)findViewById(R.id.linear1);
+        _linear2 = (LinearLayout)findViewById(R.id.linear2);
+        _buts = new View[_linear2.getChildCount()];
+        for(int i =0;i<_linear2.getChildCount();++i){
+        	_buts[i] = _linear2.getChildAt(i);
+        }
+        but_state = 1;
         _hot1Text = (TextView)findViewById(R.id.textView1);
         _fanText = (TextView)findViewById(R.id.textView2);
         _extracter1Text = (TextView)findViewById(R.id.textView3);
@@ -108,5 +125,34 @@ public class CommandActitivy extends ReceiveActivity {
         _text1 = (TextView)findViewById(R.id.textView5); 
         _text2 = (TextView)findViewById(R.id.textView6); 
         _text3 = (TextView)findViewById(R.id.textView7); 
+        UIOrentation();
+    }
+    private static String TAG = "INFO";
+    private void UIOrentation(){
+    	//判断方向
+	     if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE){
+	    	 if( but_state == 1 ){
+	    		 for( int i = 0;i<_buts.length;i++){
+	    			 _linear2.removeView(_buts[i]);
+	    			 _linear1.addView(_buts[i]);
+	    		 }
+	    	 }
+	    	 but_state = 2;
+	     }
+	     else {
+	    	 if( but_state == 2 ){
+	    		 for( int i = 0;i<_buts.length;i++){
+	    			 _linear1.removeView(_buts[i]);
+	    			 _linear2.addView(_buts[i]);
+	    		 }	    	 
+	    	 }
+	    	 but_state = 1;
+	     }    	
+    }
+    @Override
+    public void onConfigurationChanged(Configuration newConfig)
+    { 
+        super.onConfigurationChanged(newConfig); 
+        UIOrentation();
     }
 }

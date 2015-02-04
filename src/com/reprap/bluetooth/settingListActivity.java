@@ -234,9 +234,9 @@ public class settingListActivity extends FragmentActivity
     				try{
 	    	    		java.lang.reflect.Method m = device.getClass().getMethod("createInsecureRfcommSocket", new Class[] {int.class});
 	    	    		_socket = (BluetoothSocket)m.invoke(device,1);
-	    	    	//	_socket.connect();
-	    	    	//	_in = _socket.getInputStream();
-	    	    	//	_out = _socket.getOutputStream();
+	    	    		_socket.connect();
+	    	    		_in = _socket.getInputStream();
+	    	    		_out = _socket.getOutputStream();
 	    	    		_progressDialog.cancel();
     				}catch(Exception e){
     					closeConnect();

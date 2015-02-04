@@ -5,6 +5,7 @@
     android:orientation="vertical" >
 
     <TableLayout
+        android:id="@+id/tablerow1"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" >
 
@@ -120,6 +121,7 @@
                     android:id="@+id/seekBar2"
                     android:layout_width="300dp"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
                     android:layout_toLeftOf="@+id/button10" />
 
                 <Button
@@ -162,6 +164,7 @@
                     android:id="@+id/seekBar3"
                     android:layout_width="300dp"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
                     android:layout_toLeftOf="@+id/button1" />
 
                 <Button
@@ -204,6 +207,7 @@
                     android:id="@+id/seekBar4"
                     android:layout_width="300dp"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
                     android:layout_toLeftOf="@+id/button5" />
 
                 <Button
@@ -226,6 +230,7 @@
             android:layout_height="wrap_content" >
 
             <LinearLayout
+                android:id="@+id/linear1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" >
 
@@ -255,13 +260,22 @@
         </TableRow>
 
         <TableRow
-            android:id="@+id/tableRow14"
+            android:id="@+id/tableRow3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" >
 
             <LinearLayout
+                android:id="@+id/linear2"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" >
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+
+                <Button
+                    android:id="@+id/button4"
+                    style="?android:attr/buttonStyleSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="命令控制台" />
 
                 <Button
                     android:id="@+id/button7"
@@ -276,14 +290,6 @@
                     android:layout_width="106dp"
                     android:layout_height="wrap_content"
                     android:text="校准" />
-
-                <Button
-                    android:id="@+id/button4"
-                    style="?android:attr/buttonStyleSmall"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="命令控制台" />
-
             </LinearLayout>
 
         </TableRow>
