@@ -52,6 +52,7 @@
         <activity
             android:name="com.reprap.bluetooth.CommandActitivy"
             android:label="@string/title_command"
+            android:configChanges="orientation|keyboardHidden"
             android:parentActivityName="com.reprap.bluetooth.settingListActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

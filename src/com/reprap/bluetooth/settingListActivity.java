@@ -170,12 +170,6 @@ public class settingListActivity extends FragmentActivity
         	}
         }
         
-        /*
-         * register receiver for blue tooth discovery 
-         */
-        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-        registerReceiver(_receiver, filter);
-        
         android.widget.Button button = (android.widget.Button)findViewById(R.id.button1);
         button.setText(R.string.scan_bluetooth);
         button.setOnClickListener( new View.OnClickListener(){
@@ -438,6 +432,7 @@ public class settingListActivity extends FragmentActivity
     }
     @Override
     public void onStop(){
+    	unregisterReceiver(_receiver);
     	super.onStop();
     	Log.d(TAG,"onStop is called");
     }
@@ -454,6 +449,12 @@ public class settingListActivity extends FragmentActivity
     }
     @Override
     public void onStart(){
+        /*
+         * register receiver for blue tooth discovery 
+         */
+    	closeConnect();
+        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+        registerReceiver(_receiver, filter);  	
     	super.onStart();
     	Log.d(TAG,"onStart is called");
     }

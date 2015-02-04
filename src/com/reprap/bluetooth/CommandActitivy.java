@@ -5,9 +5,11 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Button;
+import android.os.Message;
 import android.widget.LinearLayout;
 import android.content.res.Configuration;
 import android.util.Log;
+import android.os.Handler;
 
 public class CommandActitivy extends ReceiveActivity {
 	static final int g28 = R.id.button2;
@@ -21,6 +23,8 @@ public class CommandActitivy extends ReceiveActivity {
 	static final int console = R.id.button4;
 	static final int [] button_id = {g28,m18,fan,extracter1,extracter2,stop,
 		sd,carlidration,console};
+	static final long TIME_OUT = 1000;
+	static final int COMMAND = 0;
 	TextView _hot1Text;
 	TextView _fanText;
 	TextView _extracter1Text;
@@ -34,6 +38,11 @@ public class CommandActitivy extends ReceiveActivity {
 	Button _extractor2Button;
 	LinearLayout _linear1;
 	LinearLayout _linear2;
+	Handler _handler;
+	/*
+	 * 从一个命令发出开始计时
+	 */
+	long _cmdTime = 0;
 	protected void initAllEvent(){
 		for( int i = 0;i < button_id.length;i++ ){
 			final int id = button_id[i];
@@ -46,7 +55,16 @@ public class CommandActitivy extends ReceiveActivity {
 		}
 	}
 	private void cmd( String s ){
-		writeString(s+"\r\n");
+		long current = System.currentTimeMillis();
+		if( _cmdTime == 0 || current-_cmdTime>TIME_OUT ){
+			writeString(s+"\r\n");
+			_cmdTime = current;
+		}else{
+			/*
+			 * 放入列表或者忽略
+			 */
+			Log.d(TAG,"上一个命令还没有返回.");
+		}
 	}
 	private void onClick( int id ){
 		switch(id){
@@ -91,6 +109,7 @@ public class CommandActitivy extends ReceiveActivity {
 	}
 	@Override
 	public void receiver( byte [] line ){
+		_cmdTime = 0;
 		showResult(new String(line,0,line.length));
 	}
 	private void showResult(String s){
@@ -126,6 +145,7 @@ public class CommandActitivy extends ReceiveActivity {
         _text2 = (TextView)findViewById(R.id.textView6); 
         _text3 = (TextView)findViewById(R.id.textView7); 
         UIOrentation();
+        InitMonitoringThread();
     }
     private static String TAG = "INFO";
     private void UIOrentation(){
@@ -154,5 +174,42 @@ public class CommandActitivy extends ReceiveActivity {
     { 
         super.onConfigurationChanged(newConfig); 
         UIOrentation();
+    }
+    private Thread _monitoringThread;
+    /*
+     * 启动一个监视线程，用于监视打印机的实时温度等参数
+     */
+    private void InitMonitoringThread(){
+    	_handler = new Handler(){
+    		@Override
+    		public void handleMessage(final Message msg){
+    			if( msg.what == COMMAND )
+    				cmd((String)msg.obj);
+    		}
+    	};
+    	_monitoringThread = new Thread(){
+    		@Override
+    		public void run(){
+    			while( _monitoringThread == Thread.currentThread() ){
+    				sendMessage(COMMAND,"M105");
+    				try{
+    				Thread.sleep(1000);
+    				}catch(Exception e){}
+    			}
+    		}
+    	};
+    	_monitoringThread.start();
+    }
+    private void sendMessage( int id,String cmd ){
+    	if( _handler == null )return;
+		Message msg = new Message();
+		msg.what = id;
+		msg.obj = cmd;
+		_handler.sendMessage(msg);
+    }
+    @Override
+    public void onDestroy(){
+    	_monitoringThread = null;
+    	super.onDestroy();
     }
 }
