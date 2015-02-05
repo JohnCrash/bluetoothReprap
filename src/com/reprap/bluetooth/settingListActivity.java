@@ -307,7 +307,8 @@ public class settingListActivity extends FragmentActivity
             m.invoke(device, (Object[]) null);
             Log.d(TAG, "Pairing finished.");
         } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
+        	//下面调用会crash
+            //Log.d(TAG, e.getMessage());
         }
     }
     private void unpairDevice(BluetoothDevice device) {
@@ -317,7 +318,7 @@ public class settingListActivity extends FragmentActivity
             m.invoke(device, (Object[]) null);
             Log.d(TAG, "Un-Pairing finished.");
         } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
+          //  Log.d(TAG, e.getMessage());
         }
     }
     private final AlertDialog.OnClickListener _onClickPair = new AlertDialog.OnClickListener(){

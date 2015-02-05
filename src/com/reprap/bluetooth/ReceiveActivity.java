@@ -17,9 +17,6 @@ import java.io.OutputStream;
 
 public class ReceiveActivity extends Activity  {
 	private static BluetoothDevice _device;
-	private static BluetoothSocket _socket;
-	private static InputStream _in;
-	private static OutputStream _out;
 	private static Thread _reciveThread;
 	private String TAG = "INFO";
     private static final int CONNECT_ERROR_MSG = 1;
@@ -29,13 +26,11 @@ public class ReceiveActivity extends Activity  {
 	public BluetoothDevice getBluetoothDevice(){
 		return _device;
 	}
-	public BluetoothSocket getBluetoothSocket(){
-		return _socket;
-	}
 	public boolean write(byte [] buffer ){
-		if( _out == null )return false;
+		OutputStream out = settingListActivity.getOutputStream();
+		if( out == null )return false;
 		try{
-		_out.write( buffer );
+			out.write( buffer );
 		}catch(Exception e){
 			Log.d(TAG,e.toString());
 			sendMessage( CONNECT_ERROR_MSG,e.toString());
@@ -75,9 +70,6 @@ public class ReceiveActivity extends Activity  {
 		    };		
 		if(_reciveThread==null){
 			_device = device;
-			_in = settingListActivity.getInputStream();
-			_out = settingListActivity.getOutputStream();
-			_socket = settingListActivity.getBluetoothSocket();
 		}
 	 }
 	    private void errorBox(String title,String info){
@@ -110,8 +102,10 @@ public class ReceiveActivity extends Activity  {
 	    				while(thisThread==_reciveThread){
 	    					try{
 	    						int i = 0;
+	    						InputStream in = settingListActivity.getInputStream();
+	    						if( in == null )return;
 	    						do{
-	    							int b = _in.read();
+	    							int b = in.read();
 	    							if( _reciveThread == null ){
 	    								Log.d(TAG,"reciverThread exit");
 	    								return; 
@@ -154,5 +148,10 @@ public class ReceiveActivity extends Activity  {
 	    @Override
 	    public void onStop(){
 	    	super.onStop();
-	    }	   
+	    }
+	    @Override
+	    public void onDestroy(){
+	    	_reciveThread = null;
+	    	super.onDestroy();
+	    }
 }

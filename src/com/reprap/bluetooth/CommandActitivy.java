@@ -145,7 +145,6 @@ public class CommandActitivy extends ReceiveActivity {
         _text2 = (TextView)findViewById(R.id.textView6); 
         _text3 = (TextView)findViewById(R.id.textView7); 
         UIOrentation();
-        InitMonitoringThread();
     }
     private static String TAG = "INFO";
     private void UIOrentation(){
@@ -191,25 +190,37 @@ public class CommandActitivy extends ReceiveActivity {
     		@Override
     		public void run(){
     			while( _monitoringThread == Thread.currentThread() ){
-    				sendMessage(COMMAND,"M105");
+    				if( !sendMessage(COMMAND,"M105") )return;
     				try{
-    				Thread.sleep(1000);
-    				}catch(Exception e){}
+    					Thread.sleep(1000);
+    				}catch(Exception e){return;}
     			}
     		}
     	};
     	_monitoringThread.start();
     }
-    private void sendMessage( int id,String cmd ){
-    	if( _handler == null )return;
+    private boolean sendMessage( int id,String cmd ){
+    	if( _handler == null )return false;
 		Message msg = new Message();
 		msg.what = id;
 		msg.obj = cmd;
 		_handler.sendMessage(msg);
+		return true;
+    }
+    @Override
+    public void onStop(){
+    	_monitoringThread = null;
+    	super.onStop();
+    }
+    @Override
+    public void onStart(){
+    	super.onStart();
+    	InitMonitoringThread();
     }
     @Override
     public void onDestroy(){
     	_monitoringThread = null;
+    	_handler = null;
     	super.onDestroy();
     }
 }
