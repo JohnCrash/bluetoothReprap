@@ -103,7 +103,10 @@ public class ReceiveActivity extends Activity  {
 	    					try{
 	    						int i = 0;
 	    						InputStream in = settingListActivity.getInputStream();
-	    						if( in == null )return;
+	    						if( in == null ){
+	    							_reciveThread = null;
+	    							return;
+	    						}
 	    						do{
 	    							int b = in.read();
 	    							if( _reciveThread == null ){
@@ -127,6 +130,7 @@ public class ReceiveActivity extends Activity  {
 	    							sendMessage(ADD_READ_MSG,buffer);
 	    						}
 	    					}catch(Exception e){
+	    						_reciveThread = null;
 	    						Log.d(TAG,String.format("Thread exit,%s",e.toString()));
 	    						//sendMessage( CONNECT_ERROR_MSG,e.toString());
 	    						return;
@@ -136,6 +140,7 @@ public class ReceiveActivity extends Activity  {
 	    		};
 	    		_reciveThread.start();
 	    	}catch(Exception e){
+	    		_reciveThread = null;
 	    		Log.d(TAG,e.toString());
 	    		sendMessage( CONNECT_ERROR_MSG,e.toString());
 	    	}
@@ -151,7 +156,6 @@ public class ReceiveActivity extends Activity  {
 	    }
 	    @Override
 	    public void onDestroy(){
-	    	_reciveThread = null;
 	    	super.onDestroy();
 	    }
 }
