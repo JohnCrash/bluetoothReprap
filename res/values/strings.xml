@@ -14,4 +14,11 @@
     <string name="error">出错了</string>
     <string name="write_error">写入数据出错</string>
     <string name="lanuch_error">启动错误，没找到设备信息</string>
+    <string name="temperature">当前温度</string>
+    <string name="hot_format">热头%1$d当前温度(%2$s/%3$s) 设置温度%4$d</string>
+    <string name="heating">加热</string>
+    <string name="stop">停止</string>
+    <string name="target_temperature">设置温度</string>
+    <string name="fan_format">风扇转速:%1$d</string>
+    <string name="fan_isrunning">开动</string>
 </resources>

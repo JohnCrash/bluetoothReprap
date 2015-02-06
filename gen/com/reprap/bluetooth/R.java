@@ -318,9 +318,16 @@ containing a value of this type.
         public static final int connect_string=0x7f060005;
         public static final int connect_title=0x7f060004;
         public static final int error=0x7f06000a;
+        public static final int fan_format=0x7f060012;
+        public static final int fan_isrunning=0x7f060013;
+        public static final int heating=0x7f06000f;
+        public static final int hot_format=0x7f06000e;
         public static final int lanuch_error=0x7f06000c;
         public static final int scan_bluetooth=0x7f060006;
         public static final int select_bluetooth=0x7f060003;
+        public static final int stop=0x7f060010;
+        public static final int target_temperature=0x7f060011;
+        public static final int temperature=0x7f06000d;
         public static final int title_calibration=0x7f060007;
         public static final int title_command=0x7f060008;
         public static final int title_console=0x7f060002;
