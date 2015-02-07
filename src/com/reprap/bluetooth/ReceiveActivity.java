@@ -41,7 +41,44 @@ public class ReceiveActivity extends Activity  {
 	public boolean writeString( String s ){
 		return write(s.getBytes());
 	}
+	public boolean cmdRaw( String s ){
+		return writeString( s + "\r\n" );
+	}
+	/*
+	 * reprap 指令发送与校验
+	 * N1 G0 X10 *91
+	 */
+	private int _cmdLineNum = 1;
+	private String _lastCmd;
+	private long _lastCmdTime;
+	private static final long TIME_OUT = 2000;
+	public boolean cmdSum( String s ){
+		int cs = 0;
+		long time = System.currentTimeMillis();
+		if( _lastCmd==null ){
+			String cmd = String.format("N%d %s ",_cmdLineNum,s);
+			int len = cmd.length();
+			for( int i=0;i<len;++i ){
+				cs ^= cmd.charAt(i);
+			}
+			cs &= 0xff;
+			_lastCmd = String.format("%s*%d",cmd,cs);
+			_cmdLineNum++;
+			_lastCmdTime = time;
+			return cmdRaw(_lastCmd);
+		}else{
+			return false;
+		}
+	}
 	public void receiver( byte [] buf ){
+		String s = new String(buf,0,buf.length);
+		//Error:checksum ...
+		if( s == "ok" ){
+			//成功
+			_lastCmd = null;
+		}else{
+			//检查失败
+		}
 	}
 	 protected void onCreate(Bundle savedInstanceState) {
 		 super.onCreate(savedInstanceState);
