@@ -11,7 +11,8 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.DialogInterface;
 import android.content.Intent;
-
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -50,8 +51,11 @@ public class ReceiveActivity extends Activity  {
 	 */
 	private int _cmdLineNum = 1;
 	private String _lastCmd;
-	private long _lastCmdTime;
+	private long _lastCmdTime = 0;
+	private int _tryCount = 0;
 	private static final long TIME_OUT = 2000;
+	private static final Pattern errorMsg = Pattern.compile("Error:([\\s\\S]*)");
+	private static final Pattern resend = Pattern.compile("Resend:(\\d+)");
 	public boolean cmdSum( String s ){
 		int cs = 0;
 		long time = System.currentTimeMillis();
@@ -66,19 +70,40 @@ public class ReceiveActivity extends Activity  {
 			_cmdLineNum++;
 			_lastCmdTime = time;
 			return cmdRaw(_lastCmd);
-		}else{
-			return false;
+		}else if(time-_lastCmdTime>TIME_OUT){
+			if( _tryCount < 2 ){
+				Log.d(TAG,String.format("%s", _lastCmd));
+				cmdRaw(_lastCmd);
+				_tryCount++;
+			}else{
+				Log.d(TAG,String.format("%s", _lastCmd));
+				_tryCount = 0;
+				_lastCmd = null;
+				return cmdSum(s);
+			}
 		}
+		return false;
 	}
-	public void receiver( byte [] buf ){
+	public boolean receiver( byte [] buf ){
 		String s = new String(buf,0,buf.length);
 		//Error:checksum ...
 		if( s == "ok" ){
 			//成功
 			_lastCmd = null;
-		}else{
-			//检查失败
+		}else if(_lastCmd!=null){
+			//校验失败
+			Matcher m = errorChecksum.matcher(s);
+			if( m.find() ){
+				
+				return true;
+			}
+			//行号错误
+			m = errorLostLine.matcher(s);
+			if( m.find() ){
+				return true;
+			}
 		}
+		return false;
 	}
 	 protected void onCreate(Bundle savedInstanceState) {
 		 super.onCreate(savedInstanceState);

@@ -53,7 +53,8 @@ public class ConselActivity extends ReceiveActivity {
         });
     }
     @Override
-    public void receiver( byte [] buffer ){
+    public boolean receiver( byte [] buffer ){
+    	super.receiver( buffer );
     	if( System.currentTimeMillis()-_lastCmdTime < 1000 ){
     		String s = _list.getItem(_list.getCount()-1);
     		String ns = String.format("%s (%s)",s,new String(buffer,0,buffer.length));
@@ -63,5 +64,6 @@ public class ConselActivity extends ReceiveActivity {
     	}else{
     		_list.add(new String(buffer,0,buffer.length) );
     	}
+    	return true;
     }
 }

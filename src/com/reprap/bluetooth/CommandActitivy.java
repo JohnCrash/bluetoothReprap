@@ -146,9 +146,11 @@ public class CommandActitivy extends ReceiveActivity {
 		}
 	}
 	@Override
-	public void receiver( byte [] line ){
+	public boolean receiver( byte [] line ){
+		super.receiver(line);
 		_cmdTime = 0;
 		showResult(new String(line,0,line.length));
+		return true;
 	}
 	private Pattern _terp;
 	private void initRegex(){
