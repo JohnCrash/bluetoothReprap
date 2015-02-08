@@ -19,9 +19,12 @@ import java.io.OutputStream;
 public class ReceiveActivity extends Activity  {
 	private static BluetoothDevice _device;
 	private static Thread _reciveThread;
+	private static Thread _timeoutThread;
 	private String TAG = "INFO";
     private static final int CONNECT_ERROR_MSG = 1;
-    private static final  int ADD_READ_MSG = 2;	 
+    private static final int ADD_READ_MSG = 2;	 
+    private static final int TRYAGIN_CMD_MSG = 3;
+    private static final int TIMEOUT_MSG = 4;
     private static Handler _handler;
     
 	public BluetoothDevice getBluetoothDevice(){
@@ -49,13 +52,39 @@ public class ReceiveActivity extends Activity  {
 	 * reprap 指令发送与校验
 	 * N1 G0 X10 *91
 	 */
-	private int _cmdLineNum = 1;
-	private String _lastCmd;
-	private long _lastCmdTime = 0;
-	private int _tryCount = 0;
-	private static final long TIME_OUT = 2000;
+	protected int _cmdLineNum = 1;
+	protected String _lastCmd;
+	protected String _lastCmdOrigin;
+	protected long _lastCmdTime = 0;
+	protected int _tryCount = 0;
+	private long TIME_OUT = 2000;
+	private static final int MAX_TRY = 3;
 	private static final Pattern errorMsg = Pattern.compile("Error:([\\s\\S]*)");
 	private static final Pattern resend = Pattern.compile("Resend:(\\d+)");
+	public static final int CMD_OK = 0;
+	public static final int CMD_TIMEOUT = 1;
+	public static final int CMD_ERROR = 2;
+	public static final int CMD_WAIT = 3;
+	public static final int STATE_TAG = 1;
+	public static final int INFO_TAG = 2;
+	
+	protected int _cmdState = 0;
+	
+	public long getTimeOut(){
+		return TIME_OUT;
+	}
+	public void setTimeOut(long t){
+		TIME_OUT = t;
+	}
+	public int getLineNum(){
+		return _cmdLineNum;
+	}
+	public String getLastCmd(){
+		return _lastCmd;
+	}
+	public String getLastCmdOrigin(){
+		return _lastCmdOrigin;
+	}
 	public boolean cmdSum( String s ){
 		int cs = 0;
 		long time = System.currentTimeMillis();
@@ -69,39 +98,55 @@ public class ReceiveActivity extends Activity  {
 			_lastCmd = String.format("%s*%d",cmd,cs);
 			_cmdLineNum++;
 			_lastCmdTime = time;
+			_cmdState = CMD_WAIT;
+			_lastCmdOrigin = s;
 			return cmdRaw(_lastCmd);
-		}else if(time-_lastCmdTime>TIME_OUT){
-			if( _tryCount < 2 ){
-				Log.d(TAG,String.format("%s", _lastCmd));
-				cmdRaw(_lastCmd);
-				_tryCount++;
-			}else{
-				Log.d(TAG,String.format("%s", _lastCmd));
-				_tryCount = 0;
-				_lastCmd = null;
-				return cmdSum(s);
-			}
 		}
 		return false;
+	}
+	public int getCmdState(){
+		return _cmdState;
+	}
+	public void cmdResult(int tag,int result,String info ){
+		
 	}
 	public boolean receiver( byte [] buf ){
 		String s = new String(buf,0,buf.length);
 		//Error:checksum ...
 		if( s == "ok" ){
 			//成功
+			_cmdState = CMD_OK;
+			cmdResult(STATE_TAG,_cmdState,s);
 			_lastCmd = null;
+			return true;
 		}else if(_lastCmd!=null){
 			//校验失败
-			Matcher m = errorChecksum.matcher(s);
+			Matcher m = errorMsg.matcher(s);
 			if( m.find() ){
-				
+				Log.d(TAG,s);
+				Log.d(TAG,_lastCmd);
+				cmdResult(INFO_TAG,_cmdState,s);
 				return true;
 			}
-			//行号错误
-			m = errorLostLine.matcher(s);
+			//处理重发请求
+			m = resend.matcher(s);
 			if( m.find() ){
-				return true;
+				int n = Integer.getInteger(m.group(1)).intValue();
+				if( n==_cmdLineNum-1 && _tryCount < MAX_TRY ){
+					_tryCount++;
+					return cmdRaw(_lastCmd); 
+				}else{
+					Log.d(TAG,getString(R.string.resend_error));
+					Log.d(TAG,s);
+					Log.d(TAG,_lastCmd);
+					_cmdState = CMD_ERROR;
+					cmdResult(STATE_TAG,_cmdState,s);
+					_tryCount = 0;
+					_lastCmd = null;
+				}
 			}
+		}else{
+			cmdResult(INFO_TAG,_cmdState,s);
 		}
 		return false;
 	}
@@ -127,6 +172,11 @@ public class ReceiveActivity extends Activity  {
 		    		case ADD_READ_MSG:
 		    			receiver((byte [])msg.obj);
 		    			break;
+		    		case TRYAGIN_CMD_MSG:
+		    			break;
+		    		case TIMEOUT_MSG:
+		    			cmdResult(STATE_TAG,_cmdState,"time out");
+		    			break;
 		    		}
 		    	}
 		    };		
@@ -151,7 +201,37 @@ public class ReceiveActivity extends Activity  {
 			msg.what = id;
 			msg.obj = obj;
 			_handler.sendMessage(msg);
-	    }
+	    }	    
+	   private void timeoutThread(){
+   			if( _timeoutThread != null )return;
+   			_timeoutThread = new Thread(){
+   				@Override
+   				public void run(){
+   					Thread thisThread = Thread.currentThread();
+   					while(thisThread==_timeoutThread){
+   						try{
+   							if( _lastCmd!=null ){
+   								long time = System.currentTimeMillis();
+   								if(time-_lastCmdTime>TIME_OUT){
+   									Log.d(TAG,getString(R.string.try_count_over));
+   									Log.d(TAG,_lastCmd);
+   									_tryCount = 0;
+   									_lastCmd = null;
+   									_cmdState = CMD_TIMEOUT;
+   									sendMessage(TIMEOUT_MSG,null);
+   								}   								
+   							}
+   							sleep(10);
+   						}catch(Exception e){
+   							_timeoutThread = null;
+   							return;
+   						}
+   					}
+   					_timeoutThread = null;
+   				}
+   			};
+   			_timeoutThread.start();
+	   }
 	   private void reciverThread(){
 	    	try{
 	    		if( _reciveThread != null )
@@ -211,6 +291,7 @@ public class ReceiveActivity extends Activity  {
 	    public void onStart(){
 	    	super.onStart();
 	    	reciverThread();
+	    	timeoutThread();
 	    }	   
 	    @Override
 	    public void onStop(){

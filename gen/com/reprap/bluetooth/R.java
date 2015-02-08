@@ -100,16 +100,19 @@ public final class R {
         public static final int heating=0x7f04000f;
         public static final int hot_format=0x7f04000e;
         public static final int lanuch_error=0x7f04000c;
+        public static final int resend_error=0x7f040014;
         public static final int scan_bluetooth=0x7f040006;
         public static final int select_bluetooth=0x7f040003;
         public static final int stop=0x7f040010;
         public static final int target_temperature=0x7f040011;
         public static final int temperature=0x7f04000d;
+        public static final int time_out_try=0x7f040015;
         public static final int title_calibration=0x7f040007;
         public static final int title_command=0x7f040008;
         public static final int title_console=0x7f040002;
         public static final int title_sdoperator=0x7f040009;
         public static final int title_setting_detail=0x7f040001;
+        public static final int try_count_over=0x7f040016;
         public static final int write_error=0x7f04000b;
     }
     public static final class style {

@@ -45,10 +45,6 @@ public class CommandActitivy extends ReceiveActivity {
 	LinearLayout _linear1;
 	LinearLayout _linear2;
 	Handler _handler;
-	/*
-	 * 从一个命令发出开始计时
-	 */
-	long _cmdTime = 0;
 	protected void initAllEvent(){
 		for( int i = 0;i < button_id.length;i++ ){
 			final int id = button_id[i];
@@ -60,39 +56,25 @@ public class CommandActitivy extends ReceiveActivity {
 	        });
 		}
 	}
-	private String _lastCmd;
-	private void cmd( String s ){
-		long current = System.currentTimeMillis();
-		if( _cmdTime == 0 || current-_cmdTime>TIME_OUT ){
-			writeString(s+"\r\n");
-			_lastCmd = s;
-			_cmdTime = current;
-		}else{
-			/*
-			 * 放入列表或者忽略
-			 */
-			Log.d(TAG,"上一个命令还没有返回.");
-		}
-	}
 	int max_temperature = 250; //hot1 max temperature
 	int hot1temperature = 180; //hot1 target temperature
 	int fanValue = 100;
 	private void onClick( int id,Button button ){
 		switch(id){
 		case g28:
-			cmd("G28");
+			cmdSum("G28");
 			break;
 		case m18:
-			cmd("M18");
+			cmdSum("M18");
 			break;
 		case hot1temp:{
 				String heating = getString(R.string.heating);
 				String stop = getString(R.string.stop);
 				if( button.getText() == heating ){
-					cmd(String.format("M104 T0 S%d",hot1temperature));
+					cmdSum(String.format("M104 T0 S%d",hot1temperature));
 					button.setText(stop);
 				}else if( button.getText() == stop ){
-					cmd(String.format("M104 T0 S0"));
+					cmdSum(String.format("M104 T0 S0"));
 					button.setText(heating);
 				}else{
 					button.setText(heating);
@@ -104,10 +86,10 @@ public class CommandActitivy extends ReceiveActivity {
 				String running = getString(R.string.fan_isrunning);
 				String stop = getString(R.string.stop);
 				if( button.getText() == running ){
-					cmd(String.format("M106 S%d", fanValue*255/100));
+					cmdSum(String.format("M106 S%d", fanValue*255/100));
 					button.setText(stop);
 				}else if( button.getText() == stop ){
-					cmd(String.format("M107"));
+					cmdSum(String.format("M107"));
 					button.setText(running);
 				}else{
 					button.setText(running);
@@ -148,7 +130,6 @@ public class CommandActitivy extends ReceiveActivity {
 	@Override
 	public boolean receiver( byte [] line ){
 		super.receiver(line);
-		_cmdTime = 0;
 		showResult(new String(line,0,line.length));
 		return true;
 	}
@@ -240,7 +221,7 @@ public class CommandActitivy extends ReceiveActivity {
         		 */
         		String stop = getString(R.string.stop);
         		if( CommandActitivy.this._fanButton.getText() == stop ){
-        			cmd(String.format("M106 S%d", fanValue*255/100));
+        			cmdSum(String.format("M106 S%d", fanValue*255/100));
         		}
         	}
         });
@@ -293,7 +274,7 @@ public class CommandActitivy extends ReceiveActivity {
     		@Override
     		public void handleMessage(final Message msg){
     			if( msg.what == COMMAND )
-    				cmd((String)msg.obj);
+    				cmdSum((String)msg.obj);
     		}
     	};
     	_monitoringThread = new Thread(){

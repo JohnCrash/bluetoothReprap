@@ -21,4 +21,7 @@
     <string name="target_temperature">设置温度</string>
     <string name="fan_format">风扇转速:%1$d</string>
     <string name="fan_isrunning">开动</string>
+    <string name="resend_error">reprap请求重发命令次数过多</string>
+    <string name="time_out_try">超时重新发送命令</string>
+    <string name="try_count_over">重试次数太多</string>
 </resources>

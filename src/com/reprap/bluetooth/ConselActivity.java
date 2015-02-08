@@ -15,7 +15,7 @@ public class ConselActivity extends ReceiveActivity {
 	private EditText _input;
 	private ArrayAdapter<String> _list;
 	private ListView _listView;
-	private long _lastCmdTime = 0;
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.consol_layout);
@@ -32,21 +32,18 @@ public class ConselActivity extends ReceiveActivity {
         		int i = cmd.indexOf(" (");
         		if( i != -1 )
         			cmd = cmd.substring(0,i);
-        		_lastCmdTime = System.currentTimeMillis();
-        		_list.add(cmd);
-        		cmd += "\r\n";
-        		write( cmd.getBytes() );
+        		if( cmdSum(cmd) )
+        			_list.add(cmd);
         }});
         _input.setOnEditorActionListener(new OnEditorActionListener(){
         	@Override
         	 public boolean onEditorAction(TextView v, int actionId, KeyEvent event){
         		String cmd = v.getText().toString();
-        		if(cmd.length()>0){ 
-        			v.setText("");
-        			_lastCmdTime = System.currentTimeMillis();
-        			_list.add(cmd);
-     				cmd += "\r\n";
-       				write(cmd.getBytes());
+        		if(cmd.length()>0){
+        			if(cmdSum(cmd)){
+        				v.setText("");
+        				_list.add(cmd);
+        			}
         		}
         		return true;
         	}
