@@ -134,6 +134,7 @@ public class ReceiveActivity extends Activity  {
 				int n = Integer.getInteger(m.group(1)).intValue();
 				if( n==_cmdLineNum-1 && _tryCount < MAX_TRY ){
 					_tryCount++;
+					cmdResult(INFO_TAG,_cmdState,s);
 					return cmdRaw(_lastCmd); 
 				}else{
 					Log.d(TAG,getString(R.string.resend_error));

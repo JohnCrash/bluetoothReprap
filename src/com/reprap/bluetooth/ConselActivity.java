@@ -50,17 +50,15 @@ public class ConselActivity extends ReceiveActivity {
         });
     }
     @Override
-    public boolean receiver( byte [] buffer ){
-    	super.receiver( buffer );
-    	if( System.currentTimeMillis()-_lastCmdTime < 1000 ){
+    public void cmdResult( int tag,int state,String info ){
+    	if( tag == STATE_TAG && state == CMD_OK ){
     		String s = _list.getItem(_list.getCount()-1);
-    		String ns = String.format("%s (%s)",s,new String(buffer,0,buffer.length));
+    		String ns = String.format("%s (%s)",s,info);
     		_list.remove(s);
     		_list.add(ns);
     		_lastCmdTime = 0;
     	}else{
-    		_list.add(new String(buffer,0,buffer.length) );
+    		_list.add(String.format("	%s",info));
     	}
-    	return true;
     }
 }

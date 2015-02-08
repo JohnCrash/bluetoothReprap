@@ -128,10 +128,8 @@ public class CommandActitivy extends ReceiveActivity {
 		}
 	}
 	@Override
-	public boolean receiver( byte [] line ){
-		super.receiver(line);
-		showResult(new String(line,0,line.length));
-		return true;
+	public void cmdResult( int tag,int state,String info ){
+		showResult(info);
 	}
 	private Pattern _terp;
 	private void initRegex(){
