@@ -167,7 +167,7 @@
                     android:layout_width="300dp"
                     android:layout_height="wrap_content"
                     android:layout_alignParentLeft="true"
-                    android:layout_toLeftOf="@+id/button1" />
+                    android:layout_toLeftOf="@+id/button13" />
 
                 <Button
                     android:id="@+id/button1"
@@ -178,6 +178,16 @@
                     android:layout_alignParentRight="true"
                     android:layout_alignParentTop="true"
                     android:text="挤出" />
+
+                <Button
+                    android:id="@+id/button13"
+                    style="?android:attr/buttonStyleSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@+id/seekBar3"
+                    android:layout_alignParentTop="true"
+                    android:layout_toLeftOf="@+id/button1"
+                    android:text="退丝" />
 
             </RelativeLayout>
 
@@ -210,7 +220,7 @@
                     android:layout_width="300dp"
                     android:layout_height="wrap_content"
                     android:layout_alignParentLeft="true"
-                    android:layout_toLeftOf="@+id/button5" />
+                    android:layout_toLeftOf="@+id/button12" />
 
                 <Button
                     android:id="@+id/button5"
@@ -221,6 +231,16 @@
                     android:layout_alignParentRight="true"
                     android:layout_alignParentTop="true"
                     android:text="挤出" />
+
+                <Button
+                    android:id="@+id/button12"
+                    style="?android:attr/buttonStyleSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@+id/seekBar4"
+                    android:layout_alignParentTop="true"
+                    android:layout_toLeftOf="@+id/button5"
+                    android:text="退丝" />
 
             </RelativeLayout>
 

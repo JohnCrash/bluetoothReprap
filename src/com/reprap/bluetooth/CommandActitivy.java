@@ -19,18 +19,23 @@ public class CommandActitivy extends ReceiveActivity {
 	static final int g28 = R.id.button2;
 	static final int m18 = R.id.button3;
 	static final int fan = R.id.button10;
+	static final int reset = R.id.button11;
 	static final int extracter1 = R.id.button5;
 	static final int extracter2 = R.id.button1;
+	static final int extracter1back = R.id.button13;
+	static final int extracter2back = R.id.button12;
 	static final int stop = R.id.button11;
 	static final int sd = R.id.button7;
 	static final int carlidration = R.id.button6;
 	static final int console = R.id.button4;
 	static final int [] button_id = {g28,m18,fan,extracter1,extracter2,stop,
-		sd,carlidration,console,hot1temp};
+		sd,carlidration,console,hot1temp,reset,extracter1back,extracter2back};
 	static final long TIME_OUT = 1000;
 	static final int COMMAND = 0;
 	TextView _hot1Text;
+	TextView _hot2Text;
 	SeekBar _hot1Bar;
+	SeekBar _hot2Bar;
 	TextView _fanText;
 	SeekBar _fanBar;
 	TextView _extracter1Text;
@@ -56,18 +61,24 @@ public class CommandActitivy extends ReceiveActivity {
 	        });
 		}
 	}
-	int max_temperature = 250; //hot1 max temperature
+	int max_temperature = 230; //hot1 max temperature
+	int min_temperature = 160;
 	int hot1temperature = 180; //hot1 target temperature
+	int hot2temperature = 180;
 	int fanValue = 100;
 	private void onClick( int id,Button button ){
 		switch(id){
-		case g28:
+		case g28: //原点
 			cmdSum("G28");
 			break;
-		case m18:
+		case m18: //停止电机
 			cmdSum("M18");
 			break;
-		case hot1temp:{
+		case reset://紧急停止
+			cmdSum("M112");
+			break;
+		case hot1temp: //热头1温度
+			{
 				String heating = getString(R.string.heating);
 				String stop = getString(R.string.stop);
 				if( button.getText() == heating ){
@@ -81,7 +92,7 @@ public class CommandActitivy extends ReceiveActivity {
 				}
 			}
 			break;
-		case fan:
+		case fan: //风扇
 			{
 				String running = getString(R.string.fan_isrunning);
 				String stop = getString(R.string.stop);
@@ -96,11 +107,15 @@ public class CommandActitivy extends ReceiveActivity {
 				}
 			}
 			break;
-		case extracter1:
+		case extracter1: //挤出机1挤出
+			break;
+		case extracter1back:
 			break;
 		case extracter2:
 			break;
-		case sd:
+		case extracter2back:
+			break;			
+		case sd: //SD卡操作界面
 			{
 				Intent intent = new Intent(CommandActitivy.this,SDOperatorActivity.class);
 				if( intent != null ){
@@ -109,7 +124,7 @@ public class CommandActitivy extends ReceiveActivity {
 				}  
 			}
 			break;
-		case carlidration:
+		case carlidration: //校准打印机
 			{
 				Intent intent = new Intent(CommandActitivy.this,CalibrationActivity.class);
 				if( intent != null ){
@@ -117,7 +132,7 @@ public class CommandActitivy extends ReceiveActivity {
 				}
 			}
 			break;
-		case console:
+		case console: //控制台
 			{
 				Intent intent = new Intent(CommandActitivy.this,ConselActivity.class);
 				if( intent != null ){
@@ -137,10 +152,18 @@ public class CommandActitivy extends ReceiveActivity {
 	}
 	private String _m105t1;
 	private String _m105t2;
+	private String _m105t3;
+	private String _m105t4;
 	private void showhot1(int i){
 		String format = getString(R.string.hot_format);
-		String text = String.format(format, i,_m105t1,_m105t2,hot1temperature);
-		_hot1Text.setText(text);
+		String text;
+		if( i == 1 ){
+			text = String.format(format, i,_m105t1,_m105t2,hot1temperature);
+			_hot1Text.setText(text);
+		}else if( i == 2){
+			text = String.format(format, i,_m105t3,_m105t4,hot2temperature);
+			_hot2Text.setText(text);			
+		}
 	}
 	private void showfan(){
 		String format = getString(R.string.fan_format);
@@ -151,14 +174,17 @@ public class CommandActitivy extends ReceiveActivity {
 		_text1.setText(_text2.getText());
 		_text2.setText(_text3.getText());
 		_text3.setText(s);
-		if( _lastCmd != null && _lastCmd != "M105" )
-			setTitle(title+_lastCmd+"("+s+")");
-		else if( _lastCmd == "M105" ){
+		String cmd = getLastCmdOrigin();
+		if( cmd != null && cmd != "M105" )
+			setTitle(title+cmd+"("+s+")");
+		else if( cmd == "M105" ){
 			//温度反馈，像这样的格式 ok T:25.1/0.0 B:4.0/0.0 @:0 B@:0
 			Matcher m = _terp.matcher(s);
 			while(m.find()){
 				_m105t1 = m.group(1); //当前温度
 				_m105t2 = m.group(2); //目标温度
+				_m105t3 = m.group(3);
+				_m105t4 = m.group(4);
 				showhot1(1);
 			}
 		}
@@ -183,14 +209,31 @@ public class CommandActitivy extends ReceiveActivity {
         }
         but_state = 1;
         _hot1Text = (TextView)findViewById(R.id.textView1);
+        _hot2Text = (TextView)findViewById(R.id.textView8);
         _hot1Bar = (SeekBar)findViewById(R.id.seekBar1); //hot1 temperature
-        _hot1Bar.setMax(max_temperature);
-        _hot1Bar.setProgress(hot1temperature);
+        _hot1Bar.setMax(max_temperature-min_temperature);
+        _hot1Bar.setProgress(hot1temperature-min_temperature);
         _hot1Bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
         	@Override
         	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser){
-        		hot1temperature = progress;
+        		hot1temperature = progress+min_temperature;
         		showhot1(1);
+        	}
+        	@Override
+        	public void onStartTrackingTouch(SeekBar seekBar){
+        	}
+        	@Override
+        	public void onStopTrackingTouch(SeekBar seekBar){
+        	}
+        });
+        _hot2Bar = (SeekBar)findViewById(R.id.seekBar5); //hot2 temperature
+        _hot2Bar.setMax(max_temperature-min_temperature);
+        _hot2Bar.setProgress(hot1temperature-min_temperature);
+        _hot2Bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
+        	@Override
+        	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser){
+        		hot2temperature = progress+min_temperature;
+        		showhot1(2);
         	}
         	@Override
         	public void onStartTrackingTouch(SeekBar seekBar){

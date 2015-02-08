@@ -61,6 +61,7 @@ public class ReceiveActivity extends Activity  {
 	private static final int MAX_TRY = 3;
 	private static final Pattern errorMsg = Pattern.compile("Error:([\\s\\S]*)");
 	private static final Pattern resend = Pattern.compile("Resend:(\\d+)");
+	private static final Pattern okPattern = Pattern.compile("ok([\\s\\S]*)");
 	public static final int CMD_OK = 0;
 	public static final int CMD_TIMEOUT = 1;
 	public static final int CMD_ERROR = 2;
@@ -90,6 +91,8 @@ public class ReceiveActivity extends Activity  {
 		long time = System.currentTimeMillis();
 		if( _lastCmd==null ){
 			String cmd = String.format("N%d %s ",_cmdLineNum,s);
+			if(_cmdLineNum==1)
+				cmd += "M110 ";
 			int len = cmd.length();
 			for( int i=0;i<len;++i ){
 				cs ^= cmd.charAt(i);
@@ -100,6 +103,12 @@ public class ReceiveActivity extends Activity  {
 			_lastCmdTime = time;
 			_cmdState = CMD_WAIT;
 			_lastCmdOrigin = s;
+			if( s == "M112" ){
+				_cmdLineNum = 1;
+				_lastCmd = null;
+				_cmdState = CMD_OK;
+				cmdRaw("M112");
+			}
 			return cmdRaw(_lastCmd);
 		}
 		return false;
@@ -113,7 +122,8 @@ public class ReceiveActivity extends Activity  {
 	public boolean receiver( byte [] buf ){
 		String s = new String(buf,0,buf.length);
 		//Error:checksum ...
-		if( s == "ok" ){
+		Matcher mok = okPattern.matcher(s);
+		if( mok.find() ){
 			//³É¹¦
 			_cmdState = CMD_OK;
 			cmdResult(STATE_TAG,_cmdState,s);
@@ -220,7 +230,7 @@ public class ReceiveActivity extends Activity  {
    									_lastCmd = null;
    									_cmdState = CMD_TIMEOUT;
    									sendMessage(TIMEOUT_MSG,null);
-   								}   								
+   								}								
    							}
    							sleep(10);
    						}catch(Exception e){

@@ -10,6 +10,7 @@ import android.widget.ArrayAdapter;
 import android.widget.AdapterView;
 import android.view.View;
 import java.lang.System;
+import android.widget.Button;
 
 public class ConselActivity extends ReceiveActivity {
 	private EditText _input;
@@ -48,10 +49,18 @@ public class ConselActivity extends ReceiveActivity {
         		return true;
         	}
         });
+        Button reset = (Button)findViewById(R.id.button1);
+        reset.setOnClickListener(new View.OnClickListener(){
+        	@Override
+        	public void onClick(View view){
+        		cmdSum("M112");
+        	}
+        });
     }
     @Override
     public void cmdResult( int tag,int state,String info ){
     	if( tag == STATE_TAG && state == CMD_OK ){
+    		if(_list.isEmpty())return;
     		String s = _list.getItem(_list.getCount()-1);
     		String ns = String.format("%s (%s)",s,info);
     		_list.remove(s);
