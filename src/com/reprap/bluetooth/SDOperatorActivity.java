@@ -23,6 +23,8 @@ public class SDOperatorActivity extends ReceiveActivity  {
 	private void deleteSDFile(String file){
 		cmdSum(String.format("M30 %s",file));
 	}
+	public static final int SDPRINT = 0;
+	public static final int BLUETOOTHPRINT = 1;
 	private ListView _fileList;
 	private ArrayAdapter<String> _list;
 	private String _selectFile;

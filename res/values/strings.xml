@@ -26,4 +26,5 @@
     <string name="try_count_over">重试次数太多</string>
     <string name="extract_length_format">挤出:%1$dmm</string>
     <string name="extract_freerate_format">挤出速度:%1$d</string>
+    <string name="gcode_chooser">请选择要打印的gcode文件</string>
 </resources>

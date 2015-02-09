@@ -13,6 +13,9 @@ import android.os.Handler;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import android.widget.SeekBar;
+import java.util.Map;
+import java.util.HashMap;
+import android.app.Dialog; 
 
 public class CommandActitivy extends ReceiveActivity {
 	static final int hot1temp = R.id.button9;
@@ -24,6 +27,7 @@ public class CommandActitivy extends ReceiveActivity {
 	static final int extracter2 = R.id.button1;
 	static final int extracter1back = R.id.button13;
 	static final int extracter2back = R.id.button12;
+	static final int print = R.id.button14;
 	static final int stop = R.id.button11;
 	static final int sd = R.id.button7;
 	static final int carlidration = R.id.button6;
@@ -95,6 +99,30 @@ public class CommandActitivy extends ReceiveActivity {
 			break;
 		case reset://紧急停止
 			cmdSum("M112");
+			break;
+		case print:
+		{
+			Map<String,Integer> images = new HashMap<String,Integer>();
+            images.put(FileChooser.sRoot, R.drawable.filedialog_root);   // 根目录图标  
+            images.put(FileChooser.sParent, R.drawable.filedialog_folder_up);    //返回上一层的图标  
+            images.put(FileChooser.sFolder, R.drawable.filedialog_folder);   //文件夹图标  
+            images.put("wav", R.drawable.filedialog_wavfile);   //wav文件图标  
+            images.put(FileChooser.sEmpty, R.drawable.filedialog_root);			
+			Dialog dialog = FileChooser.createDialog(1,this,getString(R.string.gcode_chooser),
+					new CallbackBundle(){
+				@Override
+				public void callback(Bundle bundle){
+					String filepath = bundle.getString("path");
+					Intent intent = new Intent(CommandActitivy.this,PrintingActivity.class);
+					intent.putExtra("file", filepath);
+					if( intent != null ){
+						startActivity(intent);
+					}  					
+				}
+				
+			},".gco;.gcode;",images);
+			dialog.show();
+		}
 			break;
 		case hot1temp: //热头1温度
 			{

@@ -259,9 +259,9 @@
                 <Button
                     android:id="@+id/button2"
                     style="?android:attr/buttonStyleSmall"
-                    android:layout_width="112dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="原点G28" />
+                    android:text="原点" />
 
                 <Button
                     android:id="@+id/button3"
@@ -273,9 +273,16 @@
                 <Button
                     android:id="@+id/button11"
                     style="?android:attr/buttonStyleSmall"
-                    android:layout_width="98dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="紧急停机" />
+
+                <Button
+                    android:id="@+id/button14"
+                    style="?android:attr/buttonStyleSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="打印..." />
 
             </LinearLayout>
 
@@ -297,7 +304,7 @@
                     style="?android:attr/buttonStyleSmall"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="命令控制台" />
+                    android:text="控制台" />
 
                 <Button
                     android:id="@+id/button7"
@@ -309,7 +316,7 @@
                 <Button
                     android:id="@+id/button6"
                     style="?android:attr/buttonStyleSmall"
-                    android:layout_width="106dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="校准" />
             </LinearLayout>
