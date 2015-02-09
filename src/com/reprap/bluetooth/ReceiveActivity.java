@@ -126,8 +126,8 @@ public class ReceiveActivity extends Activity  {
 		if( mok.find() ){
 			//成功
 			_cmdState = CMD_OK;
-			cmdResult(STATE_TAG,_cmdState,s);
 			_lastCmd = null;
+			cmdResult(STATE_TAG,_cmdState,s);
 			return true;
 		}else if(_lastCmd!=null){
 			//校验失败
@@ -151,9 +151,9 @@ public class ReceiveActivity extends Activity  {
 					Log.d(TAG,s);
 					Log.d(TAG,_lastCmd);
 					_cmdState = CMD_ERROR;
-					cmdResult(STATE_TAG,_cmdState,s);
 					_tryCount = 0;
 					_lastCmd = null;
+					cmdResult(STATE_TAG,_cmdState,s);
 				}
 			}
 		}else{

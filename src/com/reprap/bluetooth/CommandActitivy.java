@@ -40,6 +40,8 @@ public class CommandActitivy extends ReceiveActivity {
 	SeekBar _fanBar;
 	TextView _extracter1Text;
 	TextView _extracter2Text;
+	SeekBar _ex1Bar;
+	SeekBar _ex2Bar;
 	TextView _text1;
 	TextView _text2;
 	TextView _text3;
@@ -66,6 +68,23 @@ public class CommandActitivy extends ReceiveActivity {
 	int hot1temperature = 180; //hot1 target temperature
 	int hot2temperature = 180;
 	int fanValue = 100;
+	int exLength = 50;
+	int exFreerate = 1000; 
+	private void showExtracter(){
+		_extracter1Text.setText(String.format(getString(R.string.extract_length_format), exLength));
+		_extracter2Text.setText(String.format(getString(R.string.extract_freerate_format), exFreerate));
+	}
+	//t=1 extracter 1..,b = true front,false back
+	public void extract( int t,boolean b ){
+		int len;
+		if( b ){
+			len = exLength;
+		}else{
+			len = -exLength;
+		}
+		String cmd = String.format("G1 E%d F%d", len,exFreerate);
+		cmdSum( cmd );
+	}
 	private void onClick( int id,Button button ){
 		switch(id){
 		case g28: //原点
@@ -108,12 +127,16 @@ public class CommandActitivy extends ReceiveActivity {
 			}
 			break;
 		case extracter1: //挤出机1挤出
+			extract(1,true);
 			break;
 		case extracter1back:
+			extract(1,false);
 			break;
 		case extracter2:
+			extract(2,true);
 			break;
 		case extracter2back:
+			extract(2,false);
 			break;			
 		case sd: //SD卡操作界面
 			{
@@ -242,6 +265,8 @@ public class CommandActitivy extends ReceiveActivity {
         	public void onStopTrackingTouch(SeekBar seekBar){
         	}
         });
+        showhot1(1);
+        showhot1(2);
         _fanText = (TextView)findViewById(R.id.textView2);
         _fanBar = (SeekBar)findViewById(R.id.seekBar2);
         _fanBar.setMax(100);
@@ -266,8 +291,42 @@ public class CommandActitivy extends ReceiveActivity {
         		}
         	}
         });
+        showfan();
         _extracter1Text = (TextView)findViewById(R.id.textView3);
         _extracter2Text = (TextView)findViewById(R.id.textView4);
+        _ex1Bar = (SeekBar)findViewById(R.id.seekBar3);
+        _ex1Bar.setMax(50);
+        _ex1Bar.setProgress(exLength/10);
+        _ex1Bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
+        	@Override
+        	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser){
+        		exLength = progress*10;
+        		showExtracter();
+        	}
+        	@Override
+        	public void onStartTrackingTouch(SeekBar seekBar){
+        	}
+        	@Override
+        	public void onStopTrackingTouch(SeekBar seekBar){
+        	}
+        });        
+        _ex2Bar = (SeekBar)findViewById(R.id.seekBar4);
+        _ex2Bar.setMax(100);
+        _ex2Bar.setProgress(exFreerate/20);
+        _ex2Bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
+        	@Override
+        	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser){
+        		exFreerate = progress*20;
+        		showExtracter();
+        	}
+        	@Override
+        	public void onStartTrackingTouch(SeekBar seekBar){
+        	}
+        	@Override
+        	public void onStopTrackingTouch(SeekBar seekBar){
+        	}
+        });        
+        showExtracter();
         _hotButton = (Button)findViewById(R.id.button9);
         _fanButton = (Button)findViewById(fan);
         _fanButton.setText(getString(R.string.fan_isrunning));

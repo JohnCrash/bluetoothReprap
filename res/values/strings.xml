@@ -24,4 +24,6 @@
     <string name="resend_error">reprap请求重发命令次数过多</string>
     <string name="time_out_try">超时重新发送命令</string>
     <string name="try_count_over">重试次数太多</string>
+    <string name="extract_length_format">挤出:%1$dmm</string>
+    <string name="extract_freerate_format">挤出速度:%1$d</string>
 </resources>
