@@ -237,6 +237,7 @@ public class CommandActitivy extends ReceiveActivity {
 				_m105t3 = m.group(3);
 				_m105t4 = m.group(4);
 				showhot1(1);
+				showhot1(2);
 			}
 		}
 	}
