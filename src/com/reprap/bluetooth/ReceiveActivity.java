@@ -54,6 +54,7 @@ public class ReceiveActivity extends Activity  {
 	 */
 	protected int _cmdLineNum = 1;
 	protected String _lastCmd;
+	protected String _lastCmd2;
 	protected String _lastCmdOrigin;
 	protected long _lastCmdTime = 0;
 	protected int _tryCount = 0;
@@ -81,7 +82,7 @@ public class ReceiveActivity extends Activity  {
 		return _cmdLineNum;
 	}
 	public String getLastCmd(){
-		return _lastCmd;
+		return _lastCmd2;
 	}
 	public String getLastCmdOrigin(){
 		return _lastCmdOrigin;
@@ -99,6 +100,7 @@ public class ReceiveActivity extends Activity  {
 			}
 			cs &= 0xff;
 			_lastCmd = String.format("%s*%d",cmd,cs);
+			_lastCmd2 = _lastCmd;
 			_cmdLineNum++;
 			_lastCmdTime = time;
 			_cmdState = CMD_WAIT;
@@ -162,7 +164,8 @@ public class ReceiveActivity extends Activity  {
 		return false;
 	}
 	 protected void onCreate(Bundle savedInstanceState) {
-		 super.onCreate(savedInstanceState);
+		super.onCreate(savedInstanceState);
+		_cmdLineNum = 1;
 		BluetoothDevice device = settingListActivity.getBluetoothDevice();
 		if( device ==null){
 			Log.d(TAG,"Console activity can't launch,devic == null");
