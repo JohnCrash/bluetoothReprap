@@ -353,6 +353,7 @@ containing a value of this type.
         public static final int title_calibration=0x7f060007;
         public static final int title_command=0x7f060008;
         public static final int title_console=0x7f060002;
+        public static final int title_printing=0x7f06001b;
         public static final int title_sdoperator=0x7f060009;
         public static final int title_setting_detail=0x7f060001;
         public static final int try_count_over=0x7f060016;

@@ -68,7 +68,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.reprap.bluetooth.ConselActivity" />
         </activity>        
-       
+          <activity
+            android:name="com.reprap.bluetooth.PrintingActivity"
+            android:label="@string/title_printing"
+            android:parentActivityName="com.reprap.bluetooth.CommandActitivy" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.reprap.bluetooth.ConselActivity" />
+        </activity>       
     </application>
 
 </manifest>

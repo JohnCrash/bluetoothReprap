@@ -28,4 +28,5 @@
     <string name="extract_freerate_format">挤出速度:%1$dmm/min</string>
     <string name="gcode_chooser">请选择要打印的gcode文件</string>
     <string name="close">关闭</string>
+    <string name="title_printing">打印</string>
 </resources>

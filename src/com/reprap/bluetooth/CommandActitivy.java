@@ -37,7 +37,7 @@ public class CommandActitivy extends ReceiveActivity {
 	static final int sd = R.id.button7;
 	static final int carlidration = R.id.button6;
 	static final int console = R.id.button4;
-	static final int [] button_id = {g28,m18,fan,extracter1,extracter2,stop,
+	static final int [] button_id = {print,g28,m18,fan,extracter1,extracter2,stop,
 		sd,carlidration,console,hot1temp,reset,extracter1back,extracter2back};
 	static final long TIME_OUT = 1000;
 	static final int COMMAND = 0;

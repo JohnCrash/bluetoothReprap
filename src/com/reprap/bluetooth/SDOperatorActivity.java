@@ -7,7 +7,9 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.util.Log;
+import android.content.Intent;
 import android.graphics.Color;
+
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
@@ -50,6 +52,10 @@ public class SDOperatorActivity extends ReceiveActivity  {
         print.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
+				Intent intent = new Intent(SDOperatorActivity.this,PrintingActivity.class);
+				if( intent != null ){
+					startActivity(intent);
+				} 				
 			}
 		});
         _fileList = (ListView)findViewById(R.id.listView1);
