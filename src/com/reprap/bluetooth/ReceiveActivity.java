@@ -21,7 +21,7 @@ public class ReceiveActivity extends Activity  {
 	private static BluetoothDevice _device;
 	private static Thread _reciveThread;
 	private static Thread _timeoutThread;
-	private String TAG = "INFO";
+	private static final String TAG = "INFO";
     private static final int CONNECT_ERROR_MSG = 1;
     private static final int ADD_READ_MSG = 2;	 
     private static final int TRYAGIN_CMD_MSG = 3;
@@ -53,40 +53,46 @@ public class ReceiveActivity extends Activity  {
 	 * reprap 指令发送与校验
 	 * N1 G0 X10 *91
 	 */
-	protected int _cmdLineNum = 1;
+	protected static int _cmdLineNum = 1;
 	protected static final Pattern errorMsg = Pattern.compile("Error:([\\s\\S]*)");
 	protected static final Pattern resend = Pattern.compile("Resend:(\\d+)");
-	protected static final Pattern okPattern = Pattern.compile("ok([\\s\\S]*)");
+	protected static final Pattern okPattern = Pattern.compile("^ok([\\s\\S]*)");
 	
 	protected int _cmdState = 0;
 	
 	public int getLineNum(){
 		return _cmdLineNum;
 	}
-	private int MAX_BUFFER = 4;
-	private ArrayDeque<String> _cmdWaitResponsQueue = new ArrayDeque<String>();
-	private ArrayDeque<String> _cmdWaitSendQueue = new ArrayDeque<String>();
+	private static int MAX_BUFFER = 4;
+	private static ArrayDeque<String> _cmdWaitResponsQueue = new ArrayDeque<String>();
+	private static ArrayDeque<String> _cmdWaitSendQueue = new ArrayDeque<String>();
 	public static final int INVALID_VALUE = -2;
 	public static final int OK_BUFFER = 2;
 	public static final int OK_SEND = 1;
 	/*
 	 * 将命令发送给reprap的处理队列，如果队列满就返回false。
 	 */
-	public int cmdBuffer(String cmd){
+	public int cmdBufferImp(String cmd,boolean badd){
 		if( cmd == null ){
 			Log.d("ERROR","cmdBuffer cmd == null");
 			return INVALID_VALUE;
 		}
-		synchronized(_cmdWaitResponsQueue){
-			if( _cmdWaitResponsQueue.size() >= MAX_BUFFER ){
-				synchronized(_cmdWaitSendQueue){
-					_cmdWaitSendQueue.add(cmd);
+		if(badd){
+			synchronized(_cmdWaitResponsQueue){
+				if( _cmdWaitResponsQueue.size() >= MAX_BUFFER ){
+					synchronized(_cmdWaitSendQueue){
+						_cmdWaitSendQueue.add(cmd);
+					}
+					return OK_BUFFER;
 				}
-				return OK_BUFFER;
 			}
 		}
 		int cs = 0;
-		String sum_cmd = String.format("N%d %s ",_cmdLineNum++,cmd);
+		String sum_cmd;
+		if( _cmdLineNum==1 )
+			sum_cmd = String.format("N%d %s M110",_cmdLineNum++,cmd);
+		else
+			sum_cmd = String.format("N%d %s ",_cmdLineNum++,cmd);
 		int len = sum_cmd.length();
 		for( int i=0;i<len;++i ){
 			cs ^= sum_cmd.charAt(i);
@@ -99,6 +105,9 @@ public class ReceiveActivity extends Activity  {
 		cmdRaw(ncmd);
 		return OK_SEND;
 	}
+	public int cmdBuffer(String cmd){
+		return cmdBufferImp(cmd,true);
+	}
 	/*
 	 * 当缓冲最大数设置为1时，缓冲算法蜕化为顺序命令方式
 	 */
@@ -108,33 +117,45 @@ public class ReceiveActivity extends Activity  {
 	public void cmdResult( String cmd,String result ){
 		
 	}
+	public void completeCmdImp( String info ){
+		String cmd;
+		synchronized(_cmdWaitResponsQueue){
+			cmd = _cmdWaitResponsQueue.poll();
+		}
+		if( info != null )
+			cmdResult( cmd,info );
+		/*
+		 * 如果有缓冲的数据紧接着发出
+		 */
+		boolean isCanSend = false;
+		synchronized(_cmdWaitResponsQueue){
+			if( _cmdWaitResponsQueue.size() < MAX_BUFFER ){
+				isCanSend = true;
+			}
+		}			
+		if( isCanSend ){
+			String temp = null;
+			synchronized(_cmdWaitSendQueue){
+				if( !_cmdWaitSendQueue.isEmpty() ){
+					temp = _cmdWaitSendQueue.poll();
+				}
+			}
+			if( temp != null)
+				cmdBufferImp(temp,false);
+		}
+	}
+	/*
+	 * 有些特殊的命令不返回ok,使用completeCmd来确认命令已完结
+	 */
+	public void completeCmd(){
+		completeCmdImp( null );
+	}
 	public void receiver( byte [] buf ){
 		String s = new String(buf,0,buf.length);
 		Matcher mok = okPattern.matcher(s);
 		String cmd;
 		if( mok.find() ){
-			synchronized(_cmdWaitResponsQueue){
-				cmd = _cmdWaitResponsQueue.poll();
-			}
-			cmdResult( cmd,s );
-			/*
-			 * 如果有缓冲的数据紧接着发出
-			 */
-			boolean isCanSend = false;
-			synchronized(_cmdWaitResponsQueue){
-				if( _cmdWaitResponsQueue.size() < MAX_BUFFER ){
-					isCanSend = true;
-				}
-			}			
-			if( isCanSend ){
-				String temp = null;
-				synchronized(_cmdWaitSendQueue){
-					if( !_cmdWaitSendQueue.isEmpty() ){
-						temp = _cmdWaitSendQueue.poll();
-					}
-				}
-				if( temp != null)cmdBuffer(temp);
-			}
+			completeCmdImp( s );
 		}else{
 			Matcher m = errorMsg.matcher(s);
 			if( m.find() ){
@@ -148,6 +169,9 @@ public class ReceiveActivity extends Activity  {
 				synchronized(_cmdWaitResponsQueue){
 					cmd = _cmdWaitResponsQueue.peek();
 				}
+				/*
+				 * 命令
+				 */
 				cmdResult( cmd,s );
 			}
 		}

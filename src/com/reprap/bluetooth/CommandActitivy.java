@@ -427,7 +427,7 @@ public class CommandActitivy extends ReceiveActivity {
     			while( _monitoringThread == Thread.currentThread() ){
     				if( !sendMessage(COMMAND,"M105") )return;
     				try{
-    					Thread.sleep(1000);
+    					Thread.sleep(3000);
     				}catch(Exception e){return;}
     			}
     		}

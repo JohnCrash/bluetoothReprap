@@ -74,6 +74,11 @@ public class SDOperatorActivity extends ReceiveActivity  {
     private Pattern m30 = Pattern.compile("M30[\\s\\S]*");
     @Override
     public void cmdResult(String cmd,String info){
+    	if( cmd == null ){
+    		Log.d("ERROR","cmdResult cmd = null");
+    		Log.d("ERROR",String.format("info=%d",info));
+    		return;
+    	}
     	Matcher mok = okPattern.matcher(info);
     	if( cmd.compareTo("M20")==0 && info.compareTo("Begin file list")==0){
     		flag = 1;
@@ -86,7 +91,8 @@ public class SDOperatorActivity extends ReceiveActivity  {
     		listFile();
     	}else{
     		Matcher m = m30.matcher(cmd);
-    		if( m.find() && mok.find() ){
+    		if( m.find() ){
+    			completeCmd(); //命令已经识别,没有ok
     			listFile();
     		}else{
     			Log.d("ERROR",String.format("Last Command :%s", cmd));
