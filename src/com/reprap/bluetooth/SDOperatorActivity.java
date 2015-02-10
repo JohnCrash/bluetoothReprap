@@ -81,7 +81,7 @@ public class SDOperatorActivity extends ReceiveActivity  {
     	}else if( cmd.compareTo("M20")==0 && info.compareTo("End file list")==0){
     		flag = 0;
     	}else if( flag == 1 && cmd.compareTo("M20")==0 ){
-    		_list.add(info);
+    		_list.add(info.toLowerCase());
     	}else if( cmd.compareTo("M21")==0 && mok.find() ){
     		listFile();
     	}else{

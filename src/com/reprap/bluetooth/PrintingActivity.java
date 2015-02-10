@@ -9,6 +9,7 @@ public class PrintingActivity extends ReceiveActivity{
         setContentView(R.layout.printing_interface);
 
         _printFile = getIntent().getStringExtra("file");
+        
     }
     @Override
     public void cmdResult( String cmd,String info ){

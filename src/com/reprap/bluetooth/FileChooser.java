@@ -6,10 +6,12 @@ import java.util.HashMap;
 import java.util.List;  
 import java.util.Map;  
   
+
 import android.app.Activity;  
 import android.app.AlertDialog;  
 import android.app.Dialog;  
 import android.content.Context;  
+import android.content.DialogInterface;
 import android.os.Bundle;  
 import android.view.View;  
 import android.widget.AdapterView;  
@@ -20,7 +22,7 @@ import android.widget.AdapterView.OnItemClickListener;
 
 public class FileChooser {
     public static String tag = "FileChooser";  
-    static final public String sRoot = "/";   
+    static public String sRoot = "/";   
     static final public String sParent = "..";  
     static final public String sFolder = ".";  
     static final public String sEmpty = "";  
@@ -38,10 +40,19 @@ public class FileChooser {
         //  文件夹的索引为sFolder;  
         //  默认图标的索引为sEmpty;  
         //  其他的直接根据后缀进行索引，比如.wav文件图标的索引为"wav"  
-    public static Dialog createDialog(int id, Context context, String title, CallbackBundle callback, String suffix, Map<String, Integer> images){  
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);  
-        builder.setView(new FileSelectView(context, id, callback, suffix, images));  
-        Dialog dialog = builder.create();  
+    public static Dialog createDialog(Context context, String title, CallbackBundle callback, String suffix, Map<String, Integer> images){  
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        FileSelectView view = new FileSelectView(context,callback, suffix, images);
+        builder.setView(view);  
+        builder.setNegativeButton(context.getString(R.string.close), new DialogInterface.OnClickListener(){
+			@Override
+			public void onClick(DialogInterface dialog, int which){
+				dialog.dismiss();
+			}
+		});
+        
+        Dialog dialog = builder.create();
+        view.setDialog( dialog );
         //dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);  
         dialog.setTitle(title);  
         return dialog;  
@@ -53,22 +64,22 @@ public class FileChooser {
         private CallbackBundle callback = null;  
         private String path = sRoot;  
         private List<Map<String, Object>> list = null;  
-        private int dialogid = 0;  
           
         private String suffix = null;  
-          
+        private Dialog dialog = null;  
         private Map<String, Integer> imagemap = null;  
           
-        public FileSelectView(Context context, int dialogid, CallbackBundle callback, String suffix, Map<String, Integer> images) {  
+        public FileSelectView(Context context,CallbackBundle callback, String suffix, Map<String, Integer> images) {  
             super(context);  
             this.imagemap = images;  
             this.suffix = suffix==null?"":suffix.toLowerCase();  
             this.callback = callback;  
-            this.dialogid = dialogid;  
             this.setOnItemClickListener(this);  
             refreshFileList();  
         }  
-          
+        public void setDialog( Dialog parent ){
+        	dialog = parent;
+        }
         private String getSuffix(String filename){  
             int dix = filename.lastIndexOf('.');  
             if(dix<0){  
@@ -188,8 +199,9 @@ public class FileChooser {
                 File fl = new File(pt);  
                 if(fl.isFile()){  
                     // 如果是文件  
-                    ((Activity)getContext()).dismissDialog(this.dialogid); // 让文件夹对话框消失  
-                      
+                    //((Activity)getContext()).dismissDialog(this.dialogid); // 让文件夹对话框消失
+                	dialog.dismiss();
+                     
                     // 设置回调的返回值  
                     Bundle bundle = new Bundle();  
                     bundle.putString("path", pt);  

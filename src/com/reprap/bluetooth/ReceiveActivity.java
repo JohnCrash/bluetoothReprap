@@ -65,14 +65,25 @@ public class ReceiveActivity extends Activity  {
 	}
 	private int MAX_BUFFER = 4;
 	private ArrayDeque<String> _cmdWaitResponsQueue = new ArrayDeque<String>();
+	private ArrayDeque<String> _cmdWaitSendQueue = new ArrayDeque<String>();
+	public static final int INVALID_VALUE = -2;
+	public static final int OK_BUFFER = 2;
+	public static final int OK_SEND = 1;
 	/*
 	 * 将命令发送给reprap的处理队列，如果队列满就返回false。
 	 */
-	public boolean cmdBuffer(String cmd){
+	public int cmdBuffer(String cmd){
+		if( cmd == null ){
+			Log.d("ERROR","cmdBuffer cmd == null");
+			return INVALID_VALUE;
+		}
 		synchronized(_cmdWaitResponsQueue){
-			if( _cmdWaitResponsQueue.size() >= MAX_BUFFER )
-				return false;
-			_cmdWaitResponsQueue.add(cmd);
+			if( _cmdWaitResponsQueue.size() >= MAX_BUFFER ){
+				synchronized(_cmdWaitSendQueue){
+					_cmdWaitSendQueue.add(cmd);
+				}
+				return OK_BUFFER;
+			}
 		}
 		int cs = 0;
 		String sum_cmd = String.format("N%d %s ",_cmdLineNum++,cmd);
@@ -82,8 +93,11 @@ public class ReceiveActivity extends Activity  {
 		}
 		cs &= 0xff;		
 		String ncmd = String.format("%s*%d",sum_cmd,cs);
+		synchronized(_cmdWaitResponsQueue){
+			_cmdWaitResponsQueue.add(cmd);
+		}
 		cmdRaw(ncmd);
-		return true;
+		return OK_SEND;
 	}
 	/*
 	 * 当缓冲最大数设置为1时，缓冲算法蜕化为顺序命令方式
@@ -103,6 +117,24 @@ public class ReceiveActivity extends Activity  {
 				cmd = _cmdWaitResponsQueue.poll();
 			}
 			cmdResult( cmd,s );
+			/*
+			 * 如果有缓冲的数据紧接着发出
+			 */
+			boolean isCanSend = false;
+			synchronized(_cmdWaitResponsQueue){
+				if( _cmdWaitResponsQueue.size() < MAX_BUFFER ){
+					isCanSend = true;
+				}
+			}			
+			if( isCanSend ){
+				String temp = null;
+				synchronized(_cmdWaitSendQueue){
+					if( !_cmdWaitSendQueue.isEmpty() ){
+						temp = _cmdWaitSendQueue.poll();
+					}
+				}
+				if( temp != null)cmdBuffer(temp);
+			}
 		}else{
 			Matcher m = errorMsg.matcher(s);
 			if( m.find() ){

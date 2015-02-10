@@ -2,6 +2,7 @@ package com.reprap.bluetooth;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Button;
@@ -10,11 +11,15 @@ import android.widget.LinearLayout;
 import android.content.res.Configuration;
 import android.util.Log;
 import android.os.Handler;
+
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+
 import android.widget.SeekBar;
+
 import java.util.Map;
 import java.util.HashMap;
+
 import android.app.Dialog; 
 
 public class CommandActitivy extends ReceiveActivity {
@@ -87,7 +92,9 @@ public class CommandActitivy extends ReceiveActivity {
 			len = -exLength;
 		}
 		String cmd = String.format("G1 E%d F%d", len,exFreerate);
+		cmdBuffer( "G91");
 		cmdBuffer( cmd );
+		cmdBuffer( "G90");
 	}
 	private void onClick( int id,Button button ){
 		switch(id){
@@ -106,9 +113,17 @@ public class CommandActitivy extends ReceiveActivity {
             images.put(FileChooser.sRoot, R.drawable.filedialog_root);   // 根目录图标  
             images.put(FileChooser.sParent, R.drawable.filedialog_folder_up);    //返回上一层的图标  
             images.put(FileChooser.sFolder, R.drawable.filedialog_folder);   //文件夹图标  
-            images.put("wav", R.drawable.filedialog_wavfile);   //wav文件图标  
-            images.put(FileChooser.sEmpty, R.drawable.filedialog_root);			
-			Dialog dialog = FileChooser.createDialog(1,this,getString(R.string.gcode_chooser),
+            images.put("gco", R.drawable.filedialog_wavfile);   //gco文件图标  
+            images.put(FileChooser.sEmpty, R.drawable.filedialog_root);
+            String gcpath = Environment.getExternalStorageDirectory().getPath()+"/gcode";
+            /*
+             * 在扩展存储上创建一个目录gcode
+             */
+            java.io.File f = new java.io.File(gcpath);
+            if(!f.exists())
+            	f.mkdir();
+            FileChooser.sRoot = gcpath+"/";            
+			Dialog dialog = FileChooser.createDialog(this,getString(R.string.gcode_chooser),
 					new CallbackBundle(){
 				@Override
 				public void callback(Bundle bundle){

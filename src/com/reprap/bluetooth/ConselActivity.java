@@ -36,18 +36,17 @@ public class ConselActivity extends ReceiveActivity {
         		int i = cmd.indexOf(" (");
         		if( i != -1 )
         			cmd = cmd.substring(0,i);
-        		if( cmdBuffer(cmd) )
-        			_list.add(cmd);
+        		cmdBuffer(cmd);
+        		_list.add(cmd);
         }});
         _input.setOnEditorActionListener(new OnEditorActionListener(){
         	@Override
         	 public boolean onEditorAction(TextView v, int actionId, KeyEvent event){
         		String cmd = v.getText().toString();
         		if(cmd.length()>0){
-        			if(cmdBuffer(cmd)){
-        				v.setText("");
-        				_list.add(cmd);
-        			}
+        			cmdBuffer(cmd);
+        			v.setText("");
+        			_list.add(cmd);
         		}
         		return true;
         	}

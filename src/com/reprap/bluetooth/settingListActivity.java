@@ -2,6 +2,7 @@ package com.reprap.bluetooth;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.FragmentActivity;
@@ -15,6 +16,7 @@ import android.content.IntentFilter;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Map;
 import java.util.Set;
 
 import android.view.View;
@@ -30,6 +32,7 @@ import android.app.ProgressDialog;
 import android.widget.EditText;
 import android.view.inputmethod.InputMethodManager;
 import android.bluetooth.BluetoothSocket;
+import android.app.Dialog; 
 //import android.app.Activity;
 
 /**
@@ -178,10 +181,11 @@ public class settingListActivity extends FragmentActivity
         		startBluetoothDiscovery();
         	}
         });
+        
         _blueList.setOnItemClickListener( new AdapterView.OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent,View view,int position,long id) {
-				BluetoothDevice device = _DeviceByName.get(_arrayAdapter.getItem(position));				
+				BluetoothDevice device = _DeviceByName.get(_arrayAdapter.getItem(position));
 				if( device != null &&
 						(device.getBondState() == BluetoothDevice.BOND_BONDED || device.getBondState()==BluetoothDevice.BOND_BONDING) ){
 					//ConselActivity
