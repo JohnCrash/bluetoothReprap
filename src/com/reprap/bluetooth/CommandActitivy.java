@@ -87,18 +87,18 @@ public class CommandActitivy extends ReceiveActivity {
 			len = -exLength;
 		}
 		String cmd = String.format("G1 E%d F%d", len,exFreerate);
-		cmdSum( cmd );
+		cmdBuffer( cmd );
 	}
 	private void onClick( int id,Button button ){
 		switch(id){
 		case g28: //原点
-			cmdSum("G28");
+			cmdBuffer("G28");
 			break;
 		case m18: //停止电机
-			cmdSum("M18");
+			cmdBuffer("M18");
 			break;
 		case reset://紧急停止
-			cmdSum("M112");
+			cmdBuffer("M112");
 			break;
 		case print:
 		{
@@ -129,10 +129,10 @@ public class CommandActitivy extends ReceiveActivity {
 				String heating = getString(R.string.heating);
 				String stop = getString(R.string.stop);
 				if( button.getText() == heating ){
-					cmdSum(String.format("M104 T0 S%d",hot1temperature));
+					cmdBuffer(String.format("M104 T0 S%d",hot1temperature));
 					button.setText(stop);
 				}else if( button.getText() == stop ){
-					cmdSum(String.format("M104 T0 S0"));
+					cmdBuffer(String.format("M104 T0 S0"));
 					button.setText(heating);
 				}else{
 					button.setText(heating);
@@ -144,10 +144,10 @@ public class CommandActitivy extends ReceiveActivity {
 				String running = getString(R.string.fan_isrunning);
 				String stop = getString(R.string.stop);
 				if( button.getText() == running ){
-					cmdSum(String.format("M106 S%d", fanValue*255/100));
+					cmdBuffer(String.format("M106 S%d", fanValue*255/100));
 					button.setText(stop);
 				}else if( button.getText() == stop ){
-					cmdSum(String.format("M107"));
+					cmdBuffer(String.format("M107"));
 					button.setText(running);
 				}else{
 					button.setText(running);
@@ -194,8 +194,8 @@ public class CommandActitivy extends ReceiveActivity {
 		}
 	}
 	@Override
-	public void cmdResult( int tag,int state,String info ){
-		showResult(info);
+	public void cmdResult( String cmd,String info ){
+		showResult(cmd,info);
 	}
 	private Pattern _terp;
 	private void initRegex(){
@@ -221,11 +221,11 @@ public class CommandActitivy extends ReceiveActivity {
 		String text = String.format(format, fanValue);
 		_fanText.setText(text);
 	}
-	private void showResult(String s){
+	private void showResult(String cmd,String s){
 		_text1.setText(_text2.getText());
 		_text2.setText(_text3.getText());
 		_text3.setText(s);
-		String cmd = getLastCmdOrigin();
+
 		if( cmd != null && cmd != "M105" )
 			setTitle(title+cmd+"("+s+")");
 		else if( cmd == "M105" ){
@@ -316,7 +316,7 @@ public class CommandActitivy extends ReceiveActivity {
         		 */
         		String stop = getString(R.string.stop);
         		if( CommandActitivy.this._fanButton.getText() == stop ){
-        			cmdSum(String.format("M106 S%d", fanValue*255/100));
+        			cmdBuffer(String.format("M106 S%d", fanValue*255/100));
         		}
         	}
         });
@@ -403,7 +403,7 @@ public class CommandActitivy extends ReceiveActivity {
     		@Override
     		public void handleMessage(final Message msg){
     			if( msg.what == COMMAND )
-    				cmdSum((String)msg.obj);
+    				cmdBuffer((String)msg.obj);
     		}
     	};
     	_monitoringThread = new Thread(){

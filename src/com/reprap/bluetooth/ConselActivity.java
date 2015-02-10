@@ -9,7 +9,10 @@ import android.widget.ListView;
 import android.widget.ArrayAdapter;
 import android.widget.AdapterView;
 import android.view.View;
+
 import java.lang.System;
+import java.util.regex.Matcher;
+
 import android.widget.Button;
 
 public class ConselActivity extends ReceiveActivity {
@@ -33,7 +36,7 @@ public class ConselActivity extends ReceiveActivity {
         		int i = cmd.indexOf(" (");
         		if( i != -1 )
         			cmd = cmd.substring(0,i);
-        		if( cmdSum(cmd) )
+        		if( cmdBuffer(cmd) )
         			_list.add(cmd);
         }});
         _input.setOnEditorActionListener(new OnEditorActionListener(){
@@ -41,7 +44,7 @@ public class ConselActivity extends ReceiveActivity {
         	 public boolean onEditorAction(TextView v, int actionId, KeyEvent event){
         		String cmd = v.getText().toString();
         		if(cmd.length()>0){
-        			if(cmdSum(cmd)){
+        			if(cmdBuffer(cmd)){
         				v.setText("");
         				_list.add(cmd);
         			}
@@ -53,19 +56,19 @@ public class ConselActivity extends ReceiveActivity {
         reset.setOnClickListener(new View.OnClickListener(){
         	@Override
         	public void onClick(View view){
-        		cmdSum("M112");
+        		cmdBuffer("M112");
         	}
         });
     }
     @Override
-    public void cmdResult( int tag,int state,String info ){
-    	if( tag == STATE_TAG && state == CMD_OK ){
+    public void cmdResult( String cmd,String info ){
+    	Matcher m = okPattern.matcher(info);
+    	if( m.find() ){
     		if(_list.isEmpty())return;
     		String s = _list.getItem(_list.getCount()-1);
     		String ns = String.format("%s (%s)",s,info);
     		_list.remove(s);
     		_list.add(ns);
-    		_lastCmdTime = 0;
     	}else{
     		_list.add(String.format("	%s",info));
     	}

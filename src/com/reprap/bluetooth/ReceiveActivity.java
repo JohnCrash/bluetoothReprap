@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayDeque;
 
 public class ReceiveActivity extends Activity  {
 	private static BluetoothDevice _device;
@@ -53,115 +54,71 @@ public class ReceiveActivity extends Activity  {
 	 * N1 G0 X10 *91
 	 */
 	protected int _cmdLineNum = 1;
-	protected String _lastCmd;
-	protected String _lastCmd2;
-	protected String _lastCmdOrigin;
-	protected long _lastCmdTime = 0;
-	protected int _tryCount = 0;
-	private long TIME_OUT = 2000;
-	private static final int MAX_TRY = 3;
-	private static final Pattern errorMsg = Pattern.compile("Error:([\\s\\S]*)");
-	private static final Pattern resend = Pattern.compile("Resend:(\\d+)");
-	private static final Pattern okPattern = Pattern.compile("ok([\\s\\S]*)");
-	public static final int CMD_OK = 0;
-	public static final int CMD_TIMEOUT = 1;
-	public static final int CMD_ERROR = 2;
-	public static final int CMD_WAIT = 3;
-	public static final int STATE_TAG = 1;
-	public static final int INFO_TAG = 2;
+	protected static final Pattern errorMsg = Pattern.compile("Error:([\\s\\S]*)");
+	protected static final Pattern resend = Pattern.compile("Resend:(\\d+)");
+	protected static final Pattern okPattern = Pattern.compile("ok([\\s\\S]*)");
 	
 	protected int _cmdState = 0;
 	
-	public long getTimeOut(){
-		return TIME_OUT;
-	}
-	public void setTimeOut(long t){
-		TIME_OUT = t;
-	}
 	public int getLineNum(){
 		return _cmdLineNum;
 	}
-	public String getLastCmd(){
-		return _lastCmd2;
-	}
-	public String getLastCmdOrigin(){
-		return _lastCmdOrigin;
-	}
-	public boolean cmdSum( String s ){
-		int cs = 0;
-		long time = System.currentTimeMillis();
-		if( _lastCmd==null ){
-			String cmd = String.format("N%d %s ",_cmdLineNum,s);
-			if(_cmdLineNum==1)
-				cmd += "M110 ";
-			int len = cmd.length();
-			for( int i=0;i<len;++i ){
-				cs ^= cmd.charAt(i);
-			}
-			cs &= 0xff;
-			_lastCmd = String.format("%s*%d",cmd,cs);
-			_lastCmd2 = _lastCmd;
-			_cmdLineNum++;
-			_lastCmdTime = time;
-			_cmdState = CMD_WAIT;
-			_lastCmdOrigin = s;
-			if( s == "M112" ){
-				_cmdLineNum = 1;
-				_lastCmd = null;
-				_cmdState = CMD_OK;
-				cmdRaw("M112");
-			}
-			return cmdRaw(_lastCmd);
+	private int MAX_BUFFER = 4;
+	private ArrayDeque<String> _cmdWaitResponsQueue = new ArrayDeque<String>();
+	/*
+	 * 将命令发送给reprap的处理队列，如果队列满就返回false。
+	 */
+	public boolean cmdBuffer(String cmd){
+		synchronized(_cmdWaitResponsQueue){
+			if( _cmdWaitResponsQueue.size() >= MAX_BUFFER )
+				return false;
+			_cmdWaitResponsQueue.add(cmd);
 		}
-		return false;
+		int cs = 0;
+		String sum_cmd = String.format("N%d %s ",_cmdLineNum++,cmd);
+		int len = sum_cmd.length();
+		for( int i=0;i<len;++i ){
+			cs ^= sum_cmd.charAt(i);
+		}
+		cs &= 0xff;		
+		String ncmd = String.format("%s*%d",sum_cmd,cs);
+		cmdRaw(ncmd);
+		return true;
 	}
-	public int getCmdState(){
-		return _cmdState;
+	/*
+	 * 当缓冲最大数设置为1时，缓冲算法蜕化为顺序命令方式
+	 */
+	public void setCmdBufferMaxCount(int c){
+		MAX_BUFFER = c;
 	}
-	public void cmdResult(int tag,int result,String info ){
+	public void cmdResult( String cmd,String result ){
 		
 	}
-	public boolean receiver( byte [] buf ){
+	public void receiver( byte [] buf ){
 		String s = new String(buf,0,buf.length);
-		//Error:checksum ...
 		Matcher mok = okPattern.matcher(s);
+		String cmd;
 		if( mok.find() ){
-			//成功
-			_cmdState = CMD_OK;
-			_lastCmd = null;
-			cmdResult(STATE_TAG,_cmdState,s);
-			return true;
-		}else if(_lastCmd!=null){
-			//校验失败
+			synchronized(_cmdWaitResponsQueue){
+				cmd = _cmdWaitResponsQueue.poll();
+			}
+			cmdResult( cmd,s );
+		}else{
 			Matcher m = errorMsg.matcher(s);
 			if( m.find() ){
-				Log.d(TAG,s);
-				Log.d(TAG,_lastCmd);
-				cmdResult(INFO_TAG,_cmdState,s);
-				return true;
-			}
-			//处理重发请求
-			m = resend.matcher(s);
-			if( m.find() ){
-				int n = Integer.getInteger(m.group(1)).intValue();
-				if( n==_cmdLineNum-1 && _tryCount < MAX_TRY ){
-					_tryCount++;
-					cmdResult(INFO_TAG,_cmdState,s);
-					return cmdRaw(_lastCmd); 
-				}else{
-					Log.d(TAG,getString(R.string.resend_error));
-					Log.d(TAG,s);
-					Log.d(TAG,_lastCmd);
-					_cmdState = CMD_ERROR;
-					_tryCount = 0;
-					_lastCmd = null;
-					cmdResult(STATE_TAG,_cmdState,s);
+				//Error:checksum ...
+				Log.d("ERROR",s);
+				synchronized(_cmdWaitResponsQueue){
+					cmd = _cmdWaitResponsQueue.peek();
 				}
+				cmdResult( cmd,s );
+			}else{
+				synchronized(_cmdWaitResponsQueue){
+					cmd = _cmdWaitResponsQueue.peek();
+				}
+				cmdResult( cmd,s );
 			}
-		}else{
-			cmdResult(INFO_TAG,_cmdState,s);
 		}
-		return false;
 	}
 	 protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -189,7 +146,6 @@ public class ReceiveActivity extends Activity  {
 		    		case TRYAGIN_CMD_MSG:
 		    			break;
 		    		case TIMEOUT_MSG:
-		    			cmdResult(STATE_TAG,_cmdState,"time out");
 		    			break;
 		    		}
 		    	}
@@ -198,121 +154,86 @@ public class ReceiveActivity extends Activity  {
 			_device = device;
 		}
 	 }
-	    private void errorBox(String title,String info){
-			new AlertDialog.Builder(ReceiveActivity.this).setTitle(title)
-			.setMessage(info)
-			.setNegativeButton("Close", new DialogInterface.OnClickListener(){
-				@Override
-				public void onClick(DialogInterface dialog, int which){
-					ReceiveActivity.this.finish();
-				}
-			})
-			.show(); 
-	    }
-	    private void sendMessage( int id,Object obj){
-	    	if( _handler == null )return;
-			Message msg = new Message();
-			msg.what = id;
-			msg.obj = obj;
-			_handler.sendMessage(msg);
-	    }	    
-	   private void timeoutThread(){
-   			if( _timeoutThread != null )return;
-   			_timeoutThread = new Thread(){
-   				@Override
-   				public void run(){
-   					Thread thisThread = Thread.currentThread();
-   					while(thisThread==_timeoutThread){
-   						try{
-   							if( _lastCmd!=null ){
-   								long time = System.currentTimeMillis();
-   								if(time-_lastCmdTime>TIME_OUT){
-   									Log.d(TAG,getString(R.string.try_count_over));
-   									Log.d(TAG,_lastCmd);
-   									_tryCount = 0;
-   									_lastCmd = null;
-   									_cmdState = CMD_TIMEOUT;
-   									sendMessage(TIMEOUT_MSG,null);
-   								}								
-   							}
-   							sleep(10);
-   						}catch(Exception e){
-   							_timeoutThread = null;
-   							return;
-   						}
-   					}
-   					_timeoutThread = null;
-   				}
-   			};
-   			_timeoutThread.start();
-	   }
-	   private void reciverThread(){
-	    	try{
-	    		if( _reciveThread != null )
-	    			return;
-	    		_reciveThread = new Thread(){
-	    			@Override
-	    			public void run(){
-	    				Thread thisThread = Thread.currentThread();
-	    				final byte [] line = new byte[256];
-	    				while(thisThread==_reciveThread){
-	    					try{
-	    						int i = 0;
-	    						InputStream in = settingListActivity.getInputStream();
-	    						if( in == null ){
-	    							_reciveThread = null;
-	    							return;
-	    						}
-	    						do{
-	    							int b = in.read();
-	    							if( _reciveThread == null ){
-	    								Log.d(TAG,"reciverThread exit");
-	    								return; 
-	    							}
-	    							if( b == -1 )continue;
-	    							if( b == '\t' )continue;
-	    							if( b == '\n' )
-	    								break;
-	    							line[i++] = (byte)b;
-	    						}while( i < 256  );
-	    						//String buf = new String(line,0,i);
-	    						//Log.d(TAG,buf);
-	    						/*
-	    						 * 这里直接操作_list.add会出错
-	    						 */
-	    						if( i > 0 ){
-	    							byte [] buffer = new byte[i];
-	    							for( int j=0;j<i;j++)buffer[j] = line[j];
-	    							sendMessage(ADD_READ_MSG,buffer);
-	    						}
-	    					}catch(Exception e){
-	    						_reciveThread = null;
-	    						Log.d(TAG,String.format("Thread exit,%s",e.toString()));
-	    						//sendMessage( CONNECT_ERROR_MSG,e.toString());
-	    						return;
-	    					}
-	    				}
-	    			}
-	    		};
-	    		_reciveThread.start();
-	    	}catch(Exception e){
-	    		_reciveThread = null;
-	    		Log.d(TAG,e.toString());
-	    		sendMessage( CONNECT_ERROR_MSG,e.toString());
-	    	}
-	    }	 
-	    @Override
-	    public void onStart(){
-	    	super.onStart();
-	    	reciverThread();
-	    	timeoutThread();
-	    }	   
-	    @Override
-	    public void onStop(){
-	    	super.onStop();
-	    }
-	    @Override
-	    public void onDestroy(){
-	    	super.onDestroy();
-	    }
+    private void errorBox(String title,String info){
+		new AlertDialog.Builder(ReceiveActivity.this).setTitle(title)
+		.setMessage(info)
+		.setNegativeButton("Close", new DialogInterface.OnClickListener(){
+			@Override
+			public void onClick(DialogInterface dialog, int which){
+				ReceiveActivity.this.finish();
+			}
+		})
+		.show(); 
+    }
+    private void sendMessage( int id,Object obj){
+    	if( _handler == null )return;
+		Message msg = new Message();
+		msg.what = id;
+		msg.obj = obj;
+		_handler.sendMessage(msg);
+    }
+
+   private void reciverThread(){
+    	try{
+    		if( _reciveThread != null )
+    			return;
+    		_reciveThread = new Thread(){
+    			@Override
+    			public void run(){
+    				Thread thisThread = Thread.currentThread();
+    				final byte [] line = new byte[256];
+    				while(thisThread==_reciveThread){
+    					try{
+    						int i = 0;
+    						InputStream in = settingListActivity.getInputStream();
+    						if( in == null ){
+    							_reciveThread = null;
+    							return;
+    						}
+    						do{
+    							int b = in.read();
+    							if( _reciveThread == null ){
+    								Log.d(TAG,"reciverThread exit");
+    								return; 
+    							}
+    							if( b == -1 )continue;
+    							if( b == '\t' )continue;
+    							if( b == '\n' )
+    								break;
+    							line[i++] = (byte)b;
+    						}while( i < 256  );
+    						if( i > 0 ){
+    							byte [] buffer = new byte[i];
+    							for( int j=0;j<i;j++)buffer[j] = line[j];
+    							sendMessage(ADD_READ_MSG,buffer);
+    						}
+    					}catch(Exception e){
+    						_reciveThread = null;
+    						Log.d(TAG,String.format("Thread exit,%s",e.toString()));
+    						//sendMessage( CONNECT_ERROR_MSG,e.toString());
+    						return;
+    					}
+    				}
+    			}
+    		};
+    		_reciveThread.start();
+    	}catch(Exception e){
+    		_reciveThread = null;
+    		Log.d(TAG,e.toString());
+    		sendMessage( CONNECT_ERROR_MSG,e.toString());
+    	}
+    }	 
+    @Override
+    public void onStart(){
+    	super.onStart();
+    	reciverThread();
+    }	   
+    @Override
+    public void onStop(){
+    	super.onStop();
+    }
+    @Override
+    public void onDestroy(){
+    	super.onDestroy();
+    }
 }

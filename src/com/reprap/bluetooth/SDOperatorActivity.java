@@ -13,19 +13,19 @@ import java.util.regex.Matcher;
 
 public class SDOperatorActivity extends ReceiveActivity  {
 	private void listFile(){
-		cmdSum("M20");
+		cmdBuffer("M20");
 	}
 	private void initSD(){
-		cmdSum("M21");
+		cmdBuffer("M21");
 	}
 	private void releaseSD(){
-		cmdSum("M22");
+		cmdBuffer("M22");
 	}	
 	private void selectSDFile(String file){
 		//cmdSum(String.format("M32 %s",file));
 	}
 	private void deleteSDFile(String file){
-		cmdSum(String.format("M30 %s",file));
+		cmdBuffer(String.format("M30 %s",file));
 	}
 	public static final int SDPRINT = 0;
 	public static final int BLUETOOTHPRINT = 1;
@@ -73,9 +73,8 @@ public class SDOperatorActivity extends ReceiveActivity  {
     private int flag = 0;
     private Pattern m30 = Pattern.compile("M30[\\s\\S]*");
     @Override
-    public void cmdResult(int tag,int state,String info){
-    	String cmd = getLastCmdOrigin();
-    	
+    public void cmdResult(String cmd,String info){
+    	Matcher mok = okPattern.matcher(info);
     	if( cmd.compareTo("M20")==0 && info.compareTo("Begin file list")==0){
     		flag = 1;
     		_list.clear();
@@ -83,15 +82,15 @@ public class SDOperatorActivity extends ReceiveActivity  {
     		flag = 0;
     	}else if( flag == 1 && cmd.compareTo("M20")==0 ){
     		_list.add(info);
-    	}else if( cmd.compareTo("M21")==0 && tag==STATE_TAG && state==CMD_OK ){
+    	}else if( cmd.compareTo("M21")==0 && mok.find() ){
     		listFile();
     	}else{
     		Matcher m = m30.matcher(cmd);
-    		if( m.find()&& state == CMD_OK ){
+    		if( m.find() && mok.find() ){
     			listFile();
     		}else{
     			Log.d("ERROR",String.format("Last Command :%s", cmd));
-    			Log.d("ERROR",String.format("%d %d %s",tag,state,info));
+    			Log.d("ERROR",info);
     		}
     	}
     }

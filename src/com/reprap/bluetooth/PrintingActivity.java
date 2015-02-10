@@ -11,7 +11,7 @@ public class PrintingActivity extends ReceiveActivity{
         _printFile = getIntent().getStringExtra("file");
     }
     @Override
-    public void cmdResult( int tag,int state,String info ){
+    public void cmdResult( String cmd,String info ){
     
     }
 }
