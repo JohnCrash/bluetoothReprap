@@ -20,11 +20,16 @@
         android:max="100"
         android:progress="50" />
 
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
     <ListView
         android:id="@+id/listView1"
         android:layout_width="match_parent"
         android:layout_height="276dp"
-        android:layout_weight="0.82" >
+        android:layout_weight="0.24" >
     </ListView>
 
     <LinearLayout
