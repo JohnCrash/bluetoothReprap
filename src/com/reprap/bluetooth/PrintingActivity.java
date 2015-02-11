@@ -1,14 +1,21 @@
 package com.reprap.bluetooth;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.ProgressBar;
+
 import java.io.File;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
+
+import android.widget.ListView;
 
 public class PrintingActivity extends ReceiveActivity{
 	private static String _printFileName = null; 
@@ -31,9 +38,44 @@ public class PrintingActivity extends ReceiveActivity{
 		}
 	}	
 	private static int mode = 0;
+	private static long fileLength;
+	private static long printOffset;
 	private TextView _progressText;
 	private TextView _resultText;
 	private ProgressBar _progress;
+	private ListView _listview;
+	private static final int PROGRESS_MSG = 1;
+	private static final int ERROR_MSG = 2;
+	
+	private static Handler _handler = new Handler(){
+    	@Override
+    	public void handleMessage(final Message msg){
+    		switch( msg.what ){
+    		case PROGRESS_MSG:
+    			break;
+    		case ERROR_MSG:
+    			break;
+    		}
+    	}
+    };
+    private void errorBox(String title,String info){
+		new AlertDialog.Builder(PrintingActivity.this).setTitle(title)
+		.setMessage(info)
+		.setNegativeButton("Close", new DialogInterface.OnClickListener(){
+			@Override
+			public void onClick(DialogInterface dialog, int which){
+				PrintingActivity.this.finish();
+			}
+		})
+		.show(); 
+    }
+    private void sendMessage(int code,String info){
+    	if( _handler == null )return;
+		Message msg = new Message();
+		msg.what = code;
+		msg.obj = info;
+		_handler.sendMessage(msg);
+    }
 	private void onClick( int id,Button button ){
 		switch(id){
 		case cont:
@@ -80,8 +122,14 @@ public class PrintingActivity extends ReceiveActivity{
         		mode = 1;
 	        	try{
 	        		_printFile = new File(_printFileName);
-	        		_in = new BufferedInputStream(new FileInputStream(_printFile) );
-	        		bluetoothPrintThread();
+	        		fileLength = _printFile.length();
+	        		if( fileLength > 0 ){
+	        			printOffset = 0;
+	        			_in = new BufferedInputStream(new FileInputStream(_printFile) );
+	        			bluetoothPrintThread();
+	        		}else{
+	        			Log.d("ERROR","GCODE file length must > 0");
+	        		}
 	        	}catch(Exception e){
 	        		Log.d("ERROR",e.getMessage());
 	        	}
@@ -107,12 +155,15 @@ public class PrintingActivity extends ReceiveActivity{
     						if( _printThread != thisThread ){
     							return;
     						}
-    						if( b == -1 )continue;
+    						if( b == -1 ){
+    							//End of Stream
+    						}
     						if( b == '\r')continue;
     						if( b == '\n')
     							break;
     						line[i++] = (byte)b;
     					}while( i < 256 );
+    					printOffset += i;
     					if( i > 0 ){
     						cmdBuffer(new String(line,0,i));
     						while( isCmdBufferOver() ){
