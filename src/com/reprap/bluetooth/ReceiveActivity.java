@@ -69,6 +69,14 @@ public class ReceiveActivity extends Activity  {
 	public static final int INVALID_VALUE = -2;
 	public static final int OK_BUFFER = 2;
 	public static final int OK_SEND = 1;
+
+	public boolean isCmdBufferOver(){
+		synchronized(_cmdWaitResponsQueue){
+			if( _cmdWaitResponsQueue.size() >= MAX_BUFFER )
+				return true;
+		}
+		return false;
+	}
 	/*
 	 * 将命令发送给reprap的处理队列，如果队列满就返回false。
 	 */
@@ -253,7 +261,7 @@ public class ReceiveActivity extends Activity  {
     								return; 
     							}
     							if( b == -1 )continue;
-    							if( b == '\t' )continue;
+    							if( b == '\r' )continue;
     							if( b == '\n' )
     								break;
     							line[i++] = (byte)b;

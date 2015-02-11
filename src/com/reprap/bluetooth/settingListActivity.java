@@ -117,7 +117,7 @@ public class settingListActivity extends FragmentActivity
     			break;
     		}
     	}
-    };    
+    };  
     @Override
     protected void onCreate(Bundle savedInstanceState) {
     	Log.d(TAG,"onCreate is called~");
