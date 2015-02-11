@@ -229,8 +229,7 @@ public class PrintingActivity extends ReceiveActivity{
     						while( isCmdBufferOver() ){
     							sleep(50);
     							if( _printThread != thisThread ){
-    								_printThread = null;
-    								return;
+    								break;
     							}
     						}
     						float v = (float)printOffset/(float)fileLength;
@@ -243,8 +242,25 @@ public class PrintingActivity extends ReceiveActivity{
     					return;
     				}
     			}
+    			/*
+    			 * 等待打印完全结束
+    			 */
+    			boolean istimeout = false;
+    			int waitcount = 0;
+    			while(!isCmdBufferEmpty()){
+    				try{sleep(100);}catch(Exception e){return;}
+    				//等最多5秒
+    				if( waitcount++>50){
+    					istimeout = true; //超时退出
+    					break;
+    				}
+    			}
     			sendMessage(PROGRESS_MSG,"1","Print complete");
-    			sendMessage(OK_MSG,getString(R.string.COMPLETE),getString(R.string.COMPLETE_INFO));
+    			if( istimeout )
+    				sendMessage(OK_MSG,getString(R.string.COMPLETE),getString(R.string.COMPLETE_TIME_INFO));
+    			else
+    				sendMessage(OK_MSG,getString(R.string.COMPLETE),getString(R.string.COMPLETE_INFO));
+    			Log.d("INFO","Print complete");
     		}
     	};
     	_printThread.start();

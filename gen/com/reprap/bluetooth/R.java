@@ -332,8 +332,9 @@ containing a value of this type.
     public static final class string {
         public static final int COMPLETE=0x7f06001d;
         public static final int COMPLETE_INFO=0x7f06001e;
+        public static final int COMPLETE_TIME_INFO=0x7f060022;
         public static final int app_name=0x7f060000;
-        public static final int calibration_title=0x7f060022;
+        public static final int calibration_title=0x7f060023;
         public static final int close=0x7f06001a;
         public static final int connect_string=0x7f060005;
         public static final int connect_title=0x7f060004;
