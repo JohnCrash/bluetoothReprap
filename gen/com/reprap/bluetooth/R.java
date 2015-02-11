@@ -110,6 +110,7 @@ public final class R {
         public static final int COMPLETE=0x7f04001d;
         public static final int COMPLETE_INFO=0x7f04001e;
         public static final int app_name=0x7f040000;
+        public static final int calibration_title=0x7f040022;
         public static final int close=0x7f04001a;
         public static final int connect_string=0x7f040005;
         public static final int connect_title=0x7f040004;

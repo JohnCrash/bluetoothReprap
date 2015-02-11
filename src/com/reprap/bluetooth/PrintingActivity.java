@@ -67,6 +67,7 @@ public class PrintingActivity extends ReceiveActivity{
     				float d = Float.parseFloat(p.first);
     				_progress.setProgress((int)(d*100));
     				_progressText.setText(String.format(getString(R.string.progress_format),(int)(d*100)));
+    				_resultText.setText(p.second);
     				break;
     			}
     		case MSGBOX_MSG:
