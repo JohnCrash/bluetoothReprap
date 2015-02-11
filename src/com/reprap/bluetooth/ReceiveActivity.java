@@ -104,19 +104,6 @@ public class ReceiveActivity extends Activity  {
 			Log.d("ERROR","cmdBuffer cmd == null");
 			return INVALID_VALUE;
 		}
-		if( cmd.equals("M112") ){
-			/*
-			 * reprap重新启动
-			 * 初始化行号，清空队列
-			 */
-			_cmdLineNum = 1;
-			synchronized(_cmdWaitResponsQueue){
-				_cmdWaitResponsQueue.clear();
-			}
-			synchronized(_cmdWaitSendQueue){
-				_cmdWaitSendQueue.clear();
-			}
-		}
 		if(badd){
 			synchronized(_cmdWaitResponsQueue){
 				if( _cmdWaitResponsQueue.size() >= MAX_BUFFER ){
@@ -143,6 +130,20 @@ public class ReceiveActivity extends Activity  {
 			_cmdWaitResponsQueue.add(cmd);
 		}
 		cmdRaw(ncmd);
+		
+		if( cmd.equals("M112") ){
+			/*
+			 * reprap重新启动
+			 * 初始化行号，清空队列
+			 */
+			_cmdLineNum = 1;
+			synchronized(_cmdWaitResponsQueue){
+				_cmdWaitResponsQueue.clear();
+			}
+			synchronized(_cmdWaitSendQueue){
+				_cmdWaitSendQueue.clear();
+			}
+		}		
 		return OK_SEND;
 	}
 	public int cmdBuffer(String cmd){
