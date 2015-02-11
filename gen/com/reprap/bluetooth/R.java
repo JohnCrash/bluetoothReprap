@@ -107,6 +107,8 @@ public final class R {
         public static final int sdcard_interface=0x7f03000b;
     }
     public static final class string {
+        public static final int COMPLETE=0x7f04001d;
+        public static final int COMPLETE_INFO=0x7f04001e;
         public static final int app_name=0x7f040000;
         public static final int close=0x7f04001a;
         public static final int connect_string=0x7f040005;
@@ -120,6 +122,10 @@ public final class R {
         public static final int heating=0x7f04000f;
         public static final int hot_format=0x7f04000e;
         public static final int lanuch_error=0x7f04000c;
+        public static final int m27info=0x7f040021;
+        public static final int m27title=0x7f040020;
+        public static final int ok=0x7f04001b;
+        public static final int progress_format=0x7f04001f;
         public static final int resend_error=0x7f040014;
         public static final int scan_bluetooth=0x7f040006;
         public static final int select_bluetooth=0x7f040003;
@@ -130,7 +136,7 @@ public final class R {
         public static final int title_calibration=0x7f040007;
         public static final int title_command=0x7f040008;
         public static final int title_console=0x7f040002;
-        public static final int title_printing=0x7f04001b;
+        public static final int title_printing=0x7f04001c;
         public static final int title_sdoperator=0x7f040009;
         public static final int title_setting_detail=0x7f040001;
         public static final int try_count_over=0x7f040016;
