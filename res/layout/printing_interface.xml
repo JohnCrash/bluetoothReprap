@@ -29,7 +29,10 @@
         android:id="@+id/listView1"
         android:layout_width="match_parent"
         android:layout_height="276dp"
-        android:layout_weight="0.24" >
+        android:layout_weight="0.24"
+        android:stackFromBottom="true"
+        android:transcriptMode="alwaysScroll" >
+
     </ListView>
 
     <LinearLayout

@@ -79,7 +79,7 @@ public class PrintingActivity extends ReceiveActivity{
     		case OK_MSG:
 	    		{
 					Pair<String,String> p = (Pair<String,String>)msg.obj;
-					msgBox(ERROR_DIALOG,p.first,p.second);
+					msgBox(OK_DIALOG,p.first,p.second);
 					break;
 	    		}
     		}
@@ -155,8 +155,9 @@ public class PrintingActivity extends ReceiveActivity{
         _progressText = (TextView)findViewById(R.id.textView1);
         _resultText = (TextView)findViewById(R.id.textView2);
         _listview = (ListView)findViewById(R.id.listView1);
+        _list = new ArrayAdapter<String>( this,android.R.layout.simple_list_item_1);
         _listview.setAdapter(_list);
-        _list.clear();
+        
         _progress = (ProgressBar)findViewById(R.id.progressBar1);
         _printFileName = getIntent().getStringExtra("file");
         if( _printFileName != null ){
@@ -218,7 +219,7 @@ public class PrintingActivity extends ReceiveActivity{
     							break;
     						line[i++] = (byte)b;
     					}while( i < 256 );
-    					printOffset += i;
+    					printOffset += (i+2); //include /r/n
     					while( _printPause ){
     						sleep(100);
     					}
@@ -232,7 +233,9 @@ public class PrintingActivity extends ReceiveActivity{
     								return;
     							}
     						}
-    						sendMessage(PROGRESS_MSG,String.format("%f", printOffset/fileLength),cmd);
+    						float v = (float)printOffset/(float)fileLength;
+    						String progress = Float.toString(v);
+    						sendMessage(PROGRESS_MSG,progress,cmd);
     					}
     				}catch(Exception e){
     					_printThread = null;
@@ -240,6 +243,7 @@ public class PrintingActivity extends ReceiveActivity{
     					return;
     				}
     			}
+    			sendMessage(PROGRESS_MSG,"1","Print complete");
     			sendMessage(OK_MSG,getString(R.string.COMPLETE),getString(R.string.COMPLETE_INFO));
     		}
     	};
@@ -308,6 +312,7 @@ public class PrintingActivity extends ReceiveActivity{
     			cmdBuffer("M24");
     		}
     	}
+    	mode = 0;
     	super.onDestroy();
     }
 }
