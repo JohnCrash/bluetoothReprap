@@ -189,7 +189,8 @@ public class settingListActivity extends FragmentActivity
 				if( device != null &&
 						(device.getBondState() == BluetoothDevice.BOND_BONDED || device.getBondState()==BluetoothDevice.BOND_BONDING) ){
 					//ConselActivity
-					_bluetoothAdapter.cancelDiscovery();
+					if(_bluetoothAdapter.isDiscovering())
+						_bluetoothAdapter.cancelDiscovery();
 					if( _socket !=null ){
 						try{
 							if( _in == null )
@@ -383,8 +384,11 @@ public class settingListActivity extends FragmentActivity
 				}
 			};
 		_stopThread.start();
-		Log.d(TAG,"bluetooth startDiscovery");
-		_bluetoothAdapter.startDiscovery();    	
+		
+		if(!_bluetoothAdapter.isDiscovering()){
+			_bluetoothAdapter.startDiscovery();
+			Log.d(TAG,"bluetooth startDiscovery");
+		}
     }
     private BroadcastReceiver _receiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
