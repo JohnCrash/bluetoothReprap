@@ -72,16 +72,16 @@
             android:text="100mm" />
 
         <Button
-            android:id="@+id/button7"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="30mm" />
-
-        <Button
             android:id="@+id/button6"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="50mm" />
+
+        <Button
+            android:id="@+id/button7"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="30mm" />
 
     </LinearLayout>
 
@@ -103,13 +103,6 @@
             android:text="保存设置M500" />
 
     </LinearLayout>
-
-    <Button
-        android:id="@+id/button4"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="176dp"
-        android:layout_height="wrap_content"
-        android:text="限位开关状态(M114)" />
 
     <Button
         android:id="@+id/button9"

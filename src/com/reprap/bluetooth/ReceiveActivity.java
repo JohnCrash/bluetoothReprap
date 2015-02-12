@@ -78,6 +78,25 @@ public class ReceiveActivity extends Activity  {
 		return false;
 	}
 	/*
+	 * 如果既没有要发的命令，同时打印机缓冲区命令都执行完成返回true
+	 */
+	public boolean isCmdBufferEmpty(){
+		boolean b = false;
+		synchronized(_cmdWaitResponsQueue){
+		if(_cmdWaitResponsQueue.isEmpty()){
+			b = true;
+		}}
+		if( b ){
+			synchronized(_cmdWaitSendQueue){
+				if(_cmdWaitSendQueue.isEmpty())
+					return true;
+				else
+					return false;
+			}
+		}
+		return b;
+	}
+	/*
 	 * 将命令发送给reprap的处理队列，如果队列满就返回false。
 	 */
 	public int cmdBufferImp(String cmd,boolean badd){
@@ -111,6 +130,20 @@ public class ReceiveActivity extends Activity  {
 			_cmdWaitResponsQueue.add(cmd);
 		}
 		cmdRaw(ncmd);
+		
+		if( cmd.equals("M112") ){
+			/*
+			 * reprap重新启动
+			 * 初始化行号，清空队列
+			 */
+			_cmdLineNum = 1;
+			synchronized(_cmdWaitResponsQueue){
+				_cmdWaitResponsQueue.clear();
+			}
+			synchronized(_cmdWaitSendQueue){
+				_cmdWaitSendQueue.clear();
+			}
+		}		
 		return OK_SEND;
 	}
 	public int cmdBuffer(String cmd){

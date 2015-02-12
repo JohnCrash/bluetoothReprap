@@ -92,10 +92,10 @@ public class settingListActivity extends FragmentActivity
     private void errorBox(String title,String info){
 		new AlertDialog.Builder(settingListActivity.this).setTitle(title)
 		.setMessage(info)
-		.setNegativeButton("Close", new DialogInterface.OnClickListener(){
+		.setNegativeButton(getString(R.string.ok), new DialogInterface.OnClickListener(){
 			@Override
 			public void onClick(DialogInterface dialog, int which){
-				settingListActivity.this.finish();
+				//settingListActivity.this.finish();
 			}
 		})
 		.show(); 
