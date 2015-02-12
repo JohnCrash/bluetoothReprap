@@ -75,6 +75,7 @@ public class SDOperatorActivity extends ReceiveActivity  {
 		uploadDialog.setTitle(getString(R.string.upload));
 		uploadDialog.setMessage(String.format(getString(R.string.upload_format),f));
 		uploadDialog.setIcon(R.drawable.ic_launcher);
+		uploadDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 		uploadDialog.setProgress(0);
 		uploadDialog.setCancelable(false);
 		uploadDialog.show();
@@ -101,7 +102,8 @@ public class SDOperatorActivity extends ReceiveActivity  {
 							line[i++] = (byte)b;
 						}while( i < 256 );
 						if(i>0){
-							uploadDialog.setProgress((int)((float)(offset++*100)/(float)fileLength));
+							offset += (i+2);
+							uploadDialog.setProgress((int)((float)(offset*100)/(float)fileLength));
 							cmdBuffer(new String(line,0,i));
 						}
 					}catch(Exception e){
