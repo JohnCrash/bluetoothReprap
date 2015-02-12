@@ -38,7 +38,6 @@
     <string name="COMPLETE_TIME_INFO">打印任务已经完成。\n但是命令应答序列有问题。</string>
     <string name="calibration_title">校准</string>
     <string name="upload">上传</string>
-    <string name="upload_format">上传文件%1$d到打印机上</string>
+    <string name="upload_format">上传文件%1$s到打印机上</string>
     <string name="Settings">设置</string>
-    <string name="About@drawable/ic_action_refresh@drawable/ic_action_refresh@drawable/ic_action_refresh">关于</string>
 </resources>

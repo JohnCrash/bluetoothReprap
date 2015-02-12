@@ -83,42 +83,47 @@ public class SDOperatorActivity extends ReceiveActivity  {
 			public void run(){
 				long offset = 0;
 				Thread thisThread = Thread.currentThread();
-				cmdBuffer("M28 "+to83Format(_uploadFile.toLowerCase()));
+				String fname = to83Format(_uploadFile.toLowerCase());
+				cmdBuffer("M28 "+fname);
 				while(thisThread==_uploadThread){
 					byte [] line = new byte[256];
 					int i = 0;
 					try{
-					do{
-						int b = _in.read();
-						if( b == -1 ){
-							_uploadThread = null;
-							break;
+						do{
+							int b = _in.read();
+							if( b == -1 ){
+								_uploadThread = null;
+								break;
+							}
+							if( b == '\r' )continue;
+							if( b == '\n' )
+								break;
+							line[i++] = (byte)b;
+						}while( i < 256 );
+						if(i>0){
+							uploadDialog.setProgress((int)((float)(offset++*100)/(float)fileLength));
+							cmdBuffer(new String(line,0,i));
 						}
-						if( b == '\r' )continue;
-						if( b == '\n' )
-							break;
-						line[i++] = (byte)b;
-					}while( i < 256 );
-					if(i>0){
-						uploadDialog.setProgress((int)((float)(offset++*100)/(float)fileLength));
-						cmdBuffer(new String(line,0,i));
+					}catch(Exception e){
+						Log.d("ERROR",e.getMessage());
+						cmdBuffer("M29");
+						_in = null;
+						_uploadFile = null;
+						uploadDialog.cancel();
+						uploadDialog = null;
 					}
-					cmdBuffer("M29");
-					_in.close();
-					_in = null;
-					_uploadFile = null;
-					uploadDialog.cancel();		
-					uploadDialog = null;
-				}catch(Exception e){
+				}
+				cmdBuffer("M29");
+				try{_in.close();}catch(Exception e){
 					Log.d("ERROR",e.getMessage());
-					cmdBuffer("M29");
-					_in = null;
-					_uploadFile = null;
-					uploadDialog.cancel();
-					uploadDialog = null;
-				}}
+				}
+				_in = null;
+				_uploadFile = null;
+				uploadDialog.cancel();		
+				uploadDialog = null;
 			}
 		};
+		_uploadThread.start();
 	}
 	/*
 	 * 将文件名转换为8.3文件名,有路径去掉
@@ -141,7 +146,7 @@ public class SDOperatorActivity extends ReceiveActivity  {
 				m = 1;
 			if( c == '.' )
 				m = 2;
-			if( m == 2&&e++>3 )
+			if( m == 2&&e++>4 )
 				break;
 			if( m==0 || m == 2)
 				fn83.append(c);
@@ -236,6 +241,11 @@ public class SDOperatorActivity extends ReceiveActivity  {
     	if( cmd == null ){
     		Log.d("ERROR","cmdResult cmd = null");
     		Log.d("ERROR",String.format("info=%d",info));
+    		return;
+    	}
+    	if( cmd.equals("M29") ){
+    		completeCmd();
+    		listFile();
     		return;
     	}
     	Matcher mok = okPattern.matcher(info);
