@@ -16,7 +16,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
-import android.app.Dialog; 
+
+import android.app.ProgressDialog;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
+
+import java.io.File;
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
 
 public class SDOperatorActivity extends ReceiveActivity  {
 	private void listFile(){
@@ -34,9 +41,112 @@ public class SDOperatorActivity extends ReceiveActivity  {
 	private void deleteSDFile(String file){
 		cmdBuffer(String.format("M30 %s",file));
 	}
-	///上传文件到reprap
+	private ProgressDialog uploadDialog = null;
+	private String _uploadFile = null;
+	private Thread _uploadThread = null;
+	private BufferedInputStream _in = null;
+	private long fileLength = 0;
 	private void startUpload( String f ){
-		
+		File file = new File(f);
+		try{
+			fileLength = file.length();
+			_in = new BufferedInputStream(new FileInputStream(file));
+		}catch(Exception e){
+			Log.d("ERROR","Can not open file "+f);
+			return;
+		}
+		if( fileLength <= 0){
+			Log.d("ERROR","File size = 0, "+f);
+			return;
+		}
+		/*
+		 * wait for reprap buffer is empty
+		 */
+		int waitcount = 0;
+		while(!isCmdBufferEmpty()){
+			try{Thread.sleep(100);}catch(Exception e){}
+			if( waitcount++ > 50 ){
+				Log.d("ERROR","Wait buffer empty,time out");
+				return;
+			}
+		}		
+		_uploadFile = f;
+		uploadDialog = new ProgressDialog(this);
+		uploadDialog.setTitle(getString(R.string.upload));
+		uploadDialog.setMessage(String.format(getString(R.string.upload_format),f));
+		uploadDialog.setIcon(R.drawable.ic_launcher);
+		uploadDialog.setProgress(0);
+		uploadDialog.setCancelable(false);
+		uploadDialog.show();
+		_uploadThread = new Thread(){
+			@Override
+			public void run(){
+				long offset = 0;
+				Thread thisThread = Thread.currentThread();
+				cmdBuffer("M28 "+to83Format(_uploadFile.toLowerCase()));
+				while(thisThread==_uploadThread){
+					byte [] line = new byte[256];
+					int i = 0;
+					try{
+					do{
+						int b = _in.read();
+						if( b == -1 ){
+							_uploadThread = null;
+							break;
+						}
+						if( b == '\r' )continue;
+						if( b == '\n' )
+							break;
+						line[i++] = (byte)b;
+					}while( i < 256 );
+					if(i>0){
+						uploadDialog.setProgress((int)((float)(offset++*100)/(float)fileLength));
+						cmdBuffer(new String(line,0,i));
+					}
+					cmdBuffer("M29");
+					_in.close();
+					_in = null;
+					_uploadFile = null;
+					uploadDialog.cancel();		
+					uploadDialog = null;
+				}catch(Exception e){
+					Log.d("ERROR",e.getMessage());
+					cmdBuffer("M29");
+					_in = null;
+					_uploadFile = null;
+					uploadDialog.cancel();
+					uploadDialog = null;
+				}}
+			}
+		};
+	}
+	/*
+	 * 将文件名转换为8.3文件名,有路径去掉
+	 */
+	private String to83Format(String f){
+		StringBuffer fn = new StringBuffer();
+		for( int i = f.length()-1;i>=0;i--){
+			char c = f.charAt(i);
+			if( c == '/' || c== '\\' )
+				break;
+			fn.append(c);
+		}
+		StringBuffer fn83 = new StringBuffer();
+		int l = 0;
+		int e = 0;
+		int m = 0;
+		for( int i = fn.length()-1;i>0;i--){
+			char c = fn.charAt(i);
+			if(l++ >= 8)
+				m = 1;
+			if( c == '.' )
+				m = 2;
+			if( m == 2&&e++>3 )
+				break;
+			if( m==0 || m == 2)
+				fn83.append(c);
+		}
+		return fn83.toString();
 	}
 	public static final int SDPRINT = 0;
 	public static final int BLUETOOTHPRINT = 1;

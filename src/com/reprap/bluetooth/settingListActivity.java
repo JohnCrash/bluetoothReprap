@@ -33,6 +33,9 @@ import android.widget.EditText;
 import android.view.inputmethod.InputMethodManager;
 import android.bluetooth.BluetoothSocket;
 import android.app.Dialog; 
+import android.app.ActionBar;
+import android.view.Menu;
+import android.view.MenuInflater;
 //import android.app.Activity;
 
 /**
@@ -119,11 +122,20 @@ public class settingListActivity extends FragmentActivity
     	}
     };  
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+      MenuInflater inflater = getMenuInflater();
+   //   inflater.inflate(R.menu.refeshbar, menu);
+      return true;
+    }     
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
     	Log.d(TAG,"onCreate is called~");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.blue_enum_interface);
         setTitle(R.string.select_bluetooth);
+        ActionBar actionBar = getActionBar();
+        actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_HOME
+                | ActionBar.DISPLAY_SHOW_TITLE | ActionBar.DISPLAY_SHOW_CUSTOM);
         if (findViewById(R.id.setting_detail_container) != null) {
             // The detail container view will be present only in the
             // large-screen layouts (res/values-large and

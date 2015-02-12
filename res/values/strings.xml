@@ -37,4 +37,7 @@
     <string name="m27info">SD打印没有正常进行</string>
     <string name="COMPLETE_TIME_INFO">打印任务已经完成。\n但是命令应答序列有问题。</string>
     <string name="calibration_title">校准</string>
+    <string name="upload">上传</string>
+    <string name="upload_format">上传文件%1$d到打印机上</string>
+    <string name="Settings">设置</string>
 </resources>
