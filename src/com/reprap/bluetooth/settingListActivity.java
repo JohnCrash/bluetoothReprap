@@ -36,6 +36,7 @@ import android.app.Dialog;
 import android.app.ActionBar;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 //import android.app.Activity;
 
 /**
@@ -120,13 +121,33 @@ public class settingListActivity extends FragmentActivity
     			break;
     		}
     	}
-    };  
+    };
+    private MenuItem _searching = null; 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
       MenuInflater inflater = getMenuInflater();
-      //inflater.inflate(R.menu.mainmenu, menu);
+      inflater.inflate(R.menu.mainmenu, menu);
+
+      super.onCreateOptionsMenu(menu);
+      _searching = menu.getItem(R.id.loading_button);
+      if( _searching!=null )
+    	  _searching.setActionView(R.layout.progress_view);      
       return true;
-    }     
+    }    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Take appropriate action for each action item click
+        switch (item.getItemId()) {
+        case R.id.loading_button:
+        	return true;
+        case R.id.setting_button:
+            return true;
+        case R.id.about_button:
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
+        }
+    }    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
     	Log.d(TAG,"onCreate is called~");
@@ -136,6 +157,7 @@ public class settingListActivity extends FragmentActivity
         ActionBar actionBar = getActionBar();
         actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_HOME
                 | ActionBar.DISPLAY_SHOW_TITLE | ActionBar.DISPLAY_SHOW_CUSTOM);
+        
         if (findViewById(R.id.setting_detail_container) != null) {
             // The detail container view will be present only in the
             // large-screen layouts (res/values-large and
