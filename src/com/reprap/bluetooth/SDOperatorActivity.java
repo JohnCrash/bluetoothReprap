@@ -104,7 +104,7 @@ public class SDOperatorActivity extends ReceiveActivity  {
 						if(i>0){
 							offset += (i+2);
 							uploadDialog.setProgress((int)((float)(offset*100)/(float)fileLength));
-							cmdBuffer(new String(line,0,i));
+							cmdRaw(new String(line,0,i));
 						}
 					}catch(Exception e){
 						Log.d("ERROR",e.getMessage());
@@ -239,31 +239,23 @@ public class SDOperatorActivity extends ReceiveActivity  {
     private int flag = 0;
     private Pattern m30 = Pattern.compile("M30[\\s\\S]*");
     @Override
-    public void cmdResult(String cmd,String info){
-    	if( cmd == null ){
-    		Log.d("ERROR","cmdResult cmd = null");
-    		Log.d("ERROR",String.format("info=%d",info));
-    		return;
-    	}
+    public void cmdResult(String cmd,String info,boolean result){
     	if( cmd.equals("M29") ){
-    		completeCmd();
     		listFile();
     		return;
     	}
-    	Matcher mok = okPattern.matcher(info);
-    	if( cmd.compareTo("M20")==0 && info.compareTo("Begin file list")==0){
+    	if( cmd.equals("M20") && info.equals("Begin file list")){
     		flag = 1;
     		_list.clear();
-    	}else if( cmd.compareTo("M20")==0 && info.compareTo("End file list")==0){
+    	}else if( cmd.equals("M20") && info.equals("End file list")){
     		flag = 0;
     	}else if( flag == 1 && cmd.compareTo("M20")==0 ){
     		_list.add(info.toLowerCase());
-    	}else if( cmd.compareTo("M21")==0 && mok.find() ){
+    	}else if( cmd.equals("M21") && result ){
     		listFile();
     	}else{
     		Matcher m = m30.matcher(cmd);
-    		if( m.find() ){
-    			completeCmd(); //命令已经识别,没有ok
+    		if( m.find() && result ){
     			listFile();
     		}else{
     			Log.d("ERROR",String.format("Last Command :%s", cmd));

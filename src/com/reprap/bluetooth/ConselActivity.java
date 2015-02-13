@@ -60,9 +60,8 @@ public class ConselActivity extends ReceiveActivity {
         });
     }
     @Override
-    public void cmdResult( String cmd,String info ){
-    	Matcher m = okPattern.matcher(info);
-    	if( m.find() ){
+    public void cmdResult( String cmd,String info,boolean result ){
+    	if( result ){
     		if(_list.isEmpty())return;
     		String s = _list.getItem(_list.getCount()-1);
     		String ns = String.format("%s (%s)",s,info);

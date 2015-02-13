@@ -285,7 +285,7 @@ public class PrintingActivity extends ReceiveActivity{
     Pattern _printStatusPattern = Pattern.compile("^SD printing byte (\\d+)/(\\d+)");
     Pattern _printStatusFailed = Pattern.compile("^Not SD printing");
     @Override
-    public void cmdResult( String cmd,String info ){
+    public void cmdResult( String cmd,String info,boolean result ){
     	Matcher m = _printStatusPattern.matcher(info);
     	if( m.find() ){
     		completeCmd();
@@ -299,7 +299,6 @@ public class PrintingActivity extends ReceiveActivity{
     		m = _printStatusFailed.matcher(info);
     		if( m.find() ){
     			_sdstatusThread = null; //stop M27 thread
-    			completeCmd();
     			sendMessage(OK_DIALOG,getString(R.string.m27title),getString(R.string.m27info));
     			return;
     		}

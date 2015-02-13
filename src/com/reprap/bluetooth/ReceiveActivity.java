@@ -53,11 +53,7 @@ public class ReceiveActivity extends Activity  {
 	 * reprap 指令发送与校验
 	 * N1 G0 X10 *91
 	 */
-	protected static int _cmdLineNum = 1;
-	protected static final Pattern errorMsg = Pattern.compile("Error:([\\s\\S]*)");
-	protected static final Pattern resend = Pattern.compile("Resend:(\\d+)");
-	protected static final Pattern okPattern = Pattern.compile("^ok([\\s\\S]*)");
-	
+	protected static int _cmdLineNum = 1;	
 	protected int _cmdState = 0;
 	
 	public int getLineNum(){
@@ -104,7 +100,8 @@ public class ReceiveActivity extends Activity  {
 			Log.d("ERROR","cmdBuffer cmd == null");
 			return INVALID_VALUE;
 		}
-		if(badd){
+		boolean isReset = cmd.equals("M112");
+		if(badd && !isReset){ //确保M112立即发出
 			synchronized(_cmdWaitResponsQueue){
 				if( _cmdWaitResponsQueue.size() >= MAX_BUFFER ){
 					synchronized(_cmdWaitSendQueue){
@@ -131,10 +128,9 @@ public class ReceiveActivity extends Activity  {
 		}
 		cmdRaw(ncmd);
 		
-		if( cmd.equals("M112") ){
+		if( isReset ){
 			/*
-			 * reprap重新启动
-			 * 初始化行号，清空队列
+			 * reprap重新启动,初始化行号，清空队列
 			 */
 			_cmdLineNum = 1;
 			synchronized(_cmdWaitResponsQueue){
@@ -155,16 +151,13 @@ public class ReceiveActivity extends Activity  {
 	public void setCmdBufferMaxCount(int c){
 		MAX_BUFFER = c;
 	}
-	public void cmdResult( String cmd,String result ){
+	public void cmdResult( String cmd,String info,boolean result ){
 		
 	}
-	public void completeCmdImp( String info ){
-		String cmd;
+	public void completeCmd(){
 		synchronized(_cmdWaitResponsQueue){
-			cmd = _cmdWaitResponsQueue.poll();
-		}
-		if( info != null )
-			cmdResult( cmd,info );
+			_cmdWaitResponsQueue.poll();
+		}		
 		/*
 		 * 如果有缓冲的数据紧接着发出
 		 */
@@ -182,40 +175,24 @@ public class ReceiveActivity extends Activity  {
 				}
 			}
 			if( temp != null)
-				cmdBufferImp(temp,false);
+				cmdBufferImp(temp,false); //发送不放入缓冲
 		}
 	}
-	/*
-	 * 有些特殊的命令不返回ok,使用completeCmd来确认命令已完结
-	 */
-	public void completeCmd(){
-		completeCmdImp( null );
-	}
+
+	marlin _checker = new marlin();
 	public void receiver( byte [] buf ){
 		String s = new String(buf,0,buf.length);
-		Matcher mok = okPattern.matcher(s);
 		String cmd;
-		if( mok.find() ){
-			completeCmdImp( s );
-		}else{
-			Matcher m = errorMsg.matcher(s);
-			if( m.find() ){
-				//Error:checksum ...
-				Log.d("ERROR",s);
-				synchronized(_cmdWaitResponsQueue){
-					cmd = _cmdWaitResponsQueue.peek();
-				}
-				cmdResult( cmd,s );
-			}else{
-				synchronized(_cmdWaitResponsQueue){
-					cmd = _cmdWaitResponsQueue.peek();
-				}
-				/*
-				 * 命令
-				 */
-				cmdResult( cmd,s );
-			}
+		synchronized(_cmdWaitResponsQueue){
+			cmd = _cmdWaitResponsQueue.peek();
 		}
+		if( cmd == null )
+			cmd = "";
+		boolean r = _checker.result(cmd, s);
+		if( r )
+			completeCmd();
+		
+		cmdResult( cmd,s,r );
 	}
 	 protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
