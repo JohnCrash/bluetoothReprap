@@ -209,7 +209,7 @@ public class CommandActitivy extends ReceiveActivity {
 		}
 	}
 	@Override
-	public void cmdResult( String cmd,String info,boolean result ){
+	public void cmdResult( String cmd,String info,int result ){
 		showResult(cmd,info);
 	}
 	private Pattern _terp;

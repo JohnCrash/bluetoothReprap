@@ -285,7 +285,7 @@ public class PrintingActivity extends ReceiveActivity{
     Pattern _printStatusPattern = Pattern.compile("^SD printing byte (\\d+)/(\\d+)");
     Pattern _printStatusFailed = Pattern.compile("^Not SD printing");
     @Override
-    public void cmdResult( String cmd,String info,boolean result ){
+    public void cmdResult( String cmd,String info,int result ){
     	Matcher m = _printStatusPattern.matcher(info);
     	if( m.find() ){
     		completeCmd();

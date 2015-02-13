@@ -60,8 +60,8 @@ public class ConselActivity extends ReceiveActivity {
         });
     }
     @Override
-    public void cmdResult( String cmd,String info,boolean result ){
-    	if( result ){
+    public void cmdResult( String cmd,String info,int result ){
+    	if( result == gcode.OK ){
     		if(_list.isEmpty())return;
     		String s = _list.getItem(_list.getCount()-1);
     		String ns = String.format("%s (%s)",s,info);

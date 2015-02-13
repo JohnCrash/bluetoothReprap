@@ -151,7 +151,7 @@ public class ReceiveActivity extends Activity  {
 	public void setCmdBufferMaxCount(int c){
 		MAX_BUFFER = c;
 	}
-	public void cmdResult( String cmd,String info,boolean result ){
+	public void cmdResult( String cmd,String info,int result ){
 		
 	}
 	public void completeCmd(){
@@ -188,8 +188,8 @@ public class ReceiveActivity extends Activity  {
 		}
 		if( cmd == null )
 			cmd = "";
-		boolean r = _checker.result(cmd, s);
-		if( r )
+		int r = _checker.result(cmd, s);
+		if( r==gcode.OK )
 			completeCmd();
 		
 		cmdResult( cmd,s,r );

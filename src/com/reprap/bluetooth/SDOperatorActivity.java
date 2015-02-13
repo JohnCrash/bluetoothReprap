@@ -237,9 +237,8 @@ public class SDOperatorActivity extends ReceiveActivity  {
         initSD();
     }
     private int flag = 0;
-    private Pattern m30 = Pattern.compile("M30[\\s\\S]*");
     @Override
-    public void cmdResult(String cmd,String info,boolean result){
+    public void cmdResult(String cmd,String info,int result){
     	if( cmd.equals("M29") ){
     		listFile();
     		return;
@@ -249,18 +248,12 @@ public class SDOperatorActivity extends ReceiveActivity  {
     		_list.clear();
     	}else if( cmd.equals("M20") && info.equals("End file list")){
     		flag = 0;
-    	}else if( flag == 1 && cmd.compareTo("M20")==0 ){
+    	}else if( flag == 1 && cmd.equals("M20") ){
     		_list.add(info.toLowerCase());
-    	}else if( cmd.equals("M21") && result ){
+    	}else if( cmd.equals("M21") && result==gcode.OK ){
     		listFile();
-    	}else{
-    		Matcher m = m30.matcher(cmd);
-    		if( m.find() && result ){
-    			listFile();
-    		}else{
-    			Log.d("ERROR",String.format("Last Command :%s", cmd));
-    			Log.d("ERROR",info);
-    		}
+    	}else if( cmd.startsWith("M30") && result==gcode.OK ){
+    		listFile();
     	}
     }
     @Override
