@@ -106,10 +106,11 @@ public final class R {
         public static final int file_chooser=0x7f030006;
         public static final int fragment_setting_detail=0x7f030007;
         public static final int jiaozhun_interface=0x7f030008;
-        public static final int printing_interface=0x7f030009;
-        public static final int progress_view=0x7f03000a;
-        public static final int reprap_scrollview=0x7f03000b;
-        public static final int sdcard_interface=0x7f03000c;
+        public static final int jiaozhun_interface2=0x7f030009;
+        public static final int printing_interface=0x7f03000a;
+        public static final int progress_view=0x7f03000b;
+        public static final int reprap_scrollview=0x7f03000c;
+        public static final int sdcard_interface=0x7f03000d;
     }
     public static final class menu {
         public static final int mainmenu=0x7f060000;
