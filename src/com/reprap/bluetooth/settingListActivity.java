@@ -67,7 +67,6 @@ public class settingListActivity extends FragmentActivity
     private static int REQUEST_ENABLE_BT = 1;
     private ListView _blueList;
     private ArrayAdapter<String> _arrayAdapter;
-    private java.lang.Thread _stopThread;
     private HashMap<String,BluetoothDevice> _DeviceByName;
     private String _selectDeviceName;
     private EditText _input;
@@ -79,6 +78,9 @@ public class settingListActivity extends FragmentActivity
     private static String TAG = "INFO";
     private static final int CONNECT_ERROR_MSG = 1;
     private static final int CONNECT_SUCCESS_MSG = 2;
+    private static final int HIDE_LOADING_MSG = 3;
+    private static final int SHOW_LOADING_MSG = 4;
+    
 	private ProgressDialog _progressDialog;
 	
     public static InputStream getInputStream(){
@@ -119,6 +121,14 @@ public class settingListActivity extends FragmentActivity
 					return;
 				}    			
     			break;
+    		case HIDE_LOADING_MSG:
+    			if( _searching!=null )
+    				_searching.setVisible(false);
+    			break;
+    		case SHOW_LOADING_MSG:
+    			if( _searching!=null )
+    				_searching.setVisible(true);
+    			break;
     		}
     	}
     };
@@ -129,7 +139,7 @@ public class settingListActivity extends FragmentActivity
       inflater.inflate(R.menu.mainmenu, menu);
 
       super.onCreateOptionsMenu(menu);
-      _searching = menu.getItem(R.id.loading_button);
+      _searching = menu.findItem(R.id.loading_button);
       if( _searching!=null )
     	  _searching.setActionView(R.layout.progress_view);      
       return true;
@@ -393,34 +403,10 @@ public class settingListActivity extends FragmentActivity
     {
 		_arrayAdapter.clear();
 		_DeviceByName.clear();
-		_stopThread = new java.lang.Thread(){
-				@Override
-				public void run(){
-					Thread thisThread = Thread.currentThread();
-					int delay = 12*100;
-					while( _stopThread==thisThread )
-					{
-						try{
-							sleep(10);
-						}catch(InterruptedException e)
-						{
-							Log.d(TAG,"bluetooth cancelDiscovery for interrupt");
-							_bluetoothAdapter.cancelDiscovery();
-							return;
-						}
-						if( delay-- <= 0 )
-						{
-							Log.d("INFO","bluetooth cancelDiscovery");
-							_bluetoothAdapter.cancelDiscovery();
-							return;
-						}
-					}
-				}
-			};
-		_stopThread.start();
 		
 		if(!_bluetoothAdapter.isDiscovering()){
 			_bluetoothAdapter.startDiscovery();
+			sendMessage(SHOW_LOADING_MSG,"");
 			Log.d(TAG,"bluetooth startDiscovery");
 		}
     }
@@ -435,7 +421,9 @@ public class settingListActivity extends FragmentActivity
                 Log.d(device.getName(),device.getAddress());
                 _arrayAdapter.add(String.format("%s",device.getName()));
                 _DeviceByName.put( device.getName(),device);
-            }
+            }else if(BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+    			sendMessage(HIDE_LOADING_MSG,"");
+    		}
         }
     };
     @Override
@@ -490,6 +478,7 @@ public class settingListActivity extends FragmentActivity
     	super.onResume();
     	Log.d(TAG,"onResume is called");
     }
+
     @Override
     public void onStart(){
         /*
@@ -497,8 +486,9 @@ public class settingListActivity extends FragmentActivity
          */
     	closeConnect();
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-        registerReceiver(_receiver, filter);  	
-    	super.onStart();
+        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+        registerReceiver(_receiver, filter);  
+     	super.onStart();
     	Log.d(TAG,"onStart is called");
     }
 }

@@ -46,6 +46,8 @@ public class SDOperatorActivity extends ReceiveActivity  {
 	private Thread _uploadThread = null;
 	private BufferedInputStream _in = null;
 	private long fileLength = 0;
+	private boolean isRawMode = false;
+	private boolean waitClear = false;
 	private void startUpload( String f ){
 		File file = new File(f);
 		try{
@@ -86,6 +88,8 @@ public class SDOperatorActivity extends ReceiveActivity  {
 				Thread thisThread = Thread.currentThread();
 				String fname = to83Format(_uploadFile.toLowerCase());
 				cmdBuffer("M28 "+fname);
+				isRawMode = true;
+				waitClear = false;
 				while(thisThread==_uploadThread){
 					byte [] line = new byte[256];
 					int i = 0;
@@ -104,7 +108,10 @@ public class SDOperatorActivity extends ReceiveActivity  {
 						if(i>0){
 							offset += (i+2);
 							uploadDialog.setProgress((int)((float)(offset*100)/(float)fileLength));
+							while(waitClear)
+								sleep(10);
 							cmdRaw(new String(line,0,i));
+							waitClear = true;
 						}
 					}catch(Exception e){
 						Log.d("ERROR",e.getMessage());
@@ -115,6 +122,7 @@ public class SDOperatorActivity extends ReceiveActivity  {
 						uploadDialog = null;
 					}
 				}
+				isRawMode = false;
 				cmdBuffer("M29");
 				try{_in.close();}catch(Exception e){
 					Log.d("ERROR",e.getMessage());
@@ -160,6 +168,7 @@ public class SDOperatorActivity extends ReceiveActivity  {
 	private ListView _fileList;
 	private ArrayAdapter<String> _list;
 	private String _selectFile;
+	
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.sdcard_interface);
@@ -239,7 +248,12 @@ public class SDOperatorActivity extends ReceiveActivity  {
     private int flag = 0;
     @Override
     public void cmdResult(String cmd,String info,int result){
-    	if( cmd.equals("M29") ){
+    	if( isRawMode ){
+    		if( info.equals("ok") )
+    			waitClear = false;
+    		return;
+    	}
+    	if( cmd.equals("M29") && result ==gcode.OK ){
     		listFile();
     		return;
     	}

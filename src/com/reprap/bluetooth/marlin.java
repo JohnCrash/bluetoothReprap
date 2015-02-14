@@ -23,6 +23,10 @@ public class marlin implements gcode{
 		 */		
 		if(info.endsWith("ok"))
 			return OK;
+		if( cmd.equals("M105") && info.startsWith("ok T:"))
+			return OK;
+		if( cmd.equals("M29") && info.endsWith("Done saving file."))
+			return OK;
 		return INFO;
 	}
 }
