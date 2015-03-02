@@ -31,9 +31,10 @@ public class ReceiveActivity extends Activity  {
 	public BluetoothDevice getBluetoothDevice(){
 		return _device;
 	}
-	public boolean write(byte [] buffer ){
+	public synchronized boolean write(byte [] buffer ){
 		OutputStream out = settingListActivity.getOutputStream();
-		if( out == null )return false;
+		if( out == null )return false;		
+
 		try{
 			out.write( buffer );
 		}catch(Exception e){
@@ -47,6 +48,7 @@ public class ReceiveActivity extends Activity  {
 		return write(s.getBytes());
 	}
 	public boolean cmdRaw( String s ){
+		Log.d(TAG,s);
 		return writeString( s + "\r\n" );
 	}
 	/*
@@ -59,7 +61,7 @@ public class ReceiveActivity extends Activity  {
 	public int getLineNum(){
 		return _cmdLineNum;
 	}
-	private static int MAX_BUFFER = 4;
+	private static int MAX_BUFFER = 3;
 	private static ArrayDeque<String> _cmdWaitResponsQueue = new ArrayDeque<String>();
 	private static ArrayDeque<String> _cmdWaitSendQueue = new ArrayDeque<String>();
 	public static final int INVALID_VALUE = -2;
@@ -113,6 +115,9 @@ public class ReceiveActivity extends Activity  {
 		}
 		int cs = 0;
 		String sum_cmd;
+		if(!_cmdWaitSendQueue.isEmpty()){
+			Log.d(TAG,"=====================ERROR=======================");
+		}
 		if( _cmdLineNum==1 )
 			sum_cmd = String.format("N%d %s M110",_cmdLineNum++,cmd);
 		else

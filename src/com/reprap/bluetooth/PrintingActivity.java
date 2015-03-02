@@ -224,17 +224,19 @@ public class PrintingActivity extends ReceiveActivity{
     						sleep(100);
     					}
     					if( i > 0 ){
-    						String cmd = new String(line,0,i); 
-    						cmdBuffer(cmd);
-    						while( isCmdBufferOver() ){
-    							sleep(50);
-    							if( _printThread != thisThread ){
-    								break;
-    							}
+    						String cmd = remarkFilter(new String(line,0,i)); 
+    						if( !cmd.isEmpty() ){
+	    						cmdBuffer(cmd);
+	    						while( isCmdBufferOver() ){
+	    							sleep(50);
+	    							if( _printThread != thisThread ){
+	    								break;
+	    							}
+	    						}
+	    						float v = (float)printOffset/(float)fileLength;
+	    						String progress = Float.toString(v);
+	    						sendMessage(PROGRESS_MSG,progress,cmd);
     						}
-    						float v = (float)printOffset/(float)fileLength;
-    						String progress = Float.toString(v);
-    						sendMessage(PROGRESS_MSG,progress,cmd);
     					}
     				}catch(Exception e){
     					_printThread = null;
@@ -264,6 +266,16 @@ public class PrintingActivity extends ReceiveActivity{
     		}
     	};
     	_printThread.start();
+    }
+    /*
+     * 去除注释;后面的全部
+     */
+    String remarkFilter( String s ){
+    	int pos = s.indexOf(';');
+    	if( pos == -1 )
+    		return s;
+    	
+    	return s.substring(0,pos);
     }
     static Thread _sdstatusThread = null;
     protected void sdPrintThread(){
