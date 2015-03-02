@@ -92,20 +92,20 @@ public class CommandActitivy extends ReceiveActivity {
 			len = -exLength;
 		}
 		String cmd = String.format("G1 E%d F%d", len,exFreerate);
-		cmdBuffer( "G91");
-		cmdBuffer( cmd );
-		cmdBuffer( "G90");
+		synCmd( "G91");
+		synCmd( cmd );
+		synCmd( "G90");
 	}
 	private void onClick( int id,Button button ){
 		switch(id){
 		case g28: //原点
-			cmdBuffer("G28");
+			synCmd("G28");
 			break;
 		case m18: //停止电机
-			cmdBuffer("M18");
+			synCmd("M18");
 			break;
 		case reset://紧急停止
-			cmdBuffer("M112");
+			synCmd("M112");
 			break;
 		case print:
 		{
@@ -144,10 +144,10 @@ public class CommandActitivy extends ReceiveActivity {
 				String heating = getString(R.string.heating);
 				String stop = getString(R.string.stop);
 				if( button.getText() == heating ){
-					cmdBuffer(String.format("M104 T0 S%d",hot1temperature));
+					synCmd(String.format("M104 T0 S%d",hot1temperature));
 					button.setText(stop);
 				}else if( button.getText() == stop ){
-					cmdBuffer(String.format("M104 T0 S0"));
+					synCmd(String.format("M104 T0 S0"));
 					button.setText(heating);
 				}else{
 					button.setText(heating);
@@ -159,10 +159,10 @@ public class CommandActitivy extends ReceiveActivity {
 				String running = getString(R.string.fan_isrunning);
 				String stop = getString(R.string.stop);
 				if( button.getText() == running ){
-					cmdBuffer(String.format("M106 S%d", fanValue*255/100));
+					synCmd(String.format("M106 S%d", fanValue*255/100));
 					button.setText(stop);
 				}else if( button.getText() == stop ){
-					cmdBuffer(String.format("M107"));
+					synCmd(String.format("M107"));
 					button.setText(running);
 				}else{
 					button.setText(running);
@@ -331,7 +331,7 @@ public class CommandActitivy extends ReceiveActivity {
         		 */
         		String stop = getString(R.string.stop);
         		if( CommandActitivy.this._fanButton.getText() == stop ){
-        			cmdBuffer(String.format("M106 S%d", fanValue*255/100));
+        			synCmd(String.format("M106 S%d", fanValue*255/100));
         		}
         	}
         });
@@ -418,7 +418,7 @@ public class CommandActitivy extends ReceiveActivity {
     		@Override
     		public void handleMessage(final Message msg){
     			if( msg.what == COMMAND )
-    				cmdBuffer((String)msg.obj);
+    				synCmd((String)msg.obj);
     		}
     	};
     	_monitoringThread = new Thread(){

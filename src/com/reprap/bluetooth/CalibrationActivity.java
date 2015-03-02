@@ -147,8 +147,8 @@ public class CalibrationActivity extends ReceiveActivity  {
 				if( m.find() ){
 					float hz = Float.parseFloat(m.group(3));
 					text.setText(String.format("M206 Z%#.1f",hz-z));
-					cmdBuffer(String.format("M206 Z%#.1f",hz-z));
-					cmdBuffer("M500");
+					synCmd(String.format("M206 Z%#.1f",hz-z));
+					synCmd("M500");
 				}
 			}
 		}
@@ -175,7 +175,7 @@ public class CalibrationActivity extends ReceiveActivity  {
 			public void run(){
 				Thread thisThread = Thread.currentThread();
 				while(thisThread==_m119Thread){
-					cmdBuffer("M119");
+					synCmd("M119");
 					try{sleep(1000);}catch(Exception e){
 						_m119Thread = null;
 					}

@@ -19,6 +19,11 @@ public class marlin implements gcode{
 		if( info.startsWith("Error:"))
 			return ERROR;
 		/*
+		 * Resend:
+		 */
+		if( info.startsWith("Resend: "))
+			return RESEND;
+		/*
 		 * 这里我假设默认命令返回ok结束
 		 */		
 		if(info.endsWith("ok"))

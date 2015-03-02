@@ -61,63 +61,36 @@ public class ReceiveActivity extends Activity  {
 	public int getLineNum(){
 		return _cmdLineNum;
 	}
-	private static int MAX_BUFFER = 3;
-	private static ArrayDeque<String> _cmdWaitResponsQueue = new ArrayDeque<String>();
-	private static ArrayDeque<String> _cmdWaitSendQueue = new ArrayDeque<String>();
+	private static String _lastCmd = null;
+	private static String _lastNCmd = null;
+	public static final int WAITING_RESPENDS = -1;
 	public static final int INVALID_VALUE = -2;
 	public static final int OK_BUFFER = 2;
 	public static final int OK_SEND = 1;
 
 	public boolean isCmdBufferOver(){
-		synchronized(_cmdWaitResponsQueue){
-			if( _cmdWaitResponsQueue.size() >= MAX_BUFFER )
-				return true;
-		}
-		return false;
+		return _lastCmd != null;
 	}
 	/*
 	 * 如果既没有要发的命令，同时打印机缓冲区命令都执行完成返回true
 	 */
 	public boolean isCmdBufferEmpty(){
-		boolean b = false;
-		synchronized(_cmdWaitResponsQueue){
-		if(_cmdWaitResponsQueue.isEmpty()){
-			b = true;
-		}}
-		if( b ){
-			synchronized(_cmdWaitSendQueue){
-				if(_cmdWaitSendQueue.isEmpty())
-					return true;
-				else
-					return false;
-			}
-		}
-		return b;
+		return _lastCmd == null;
 	}
 	/*
 	 * 将命令发送给reprap的处理队列，如果队列满就返回false。
 	 */
-	public int cmdBufferImp(String cmd,boolean badd){
+	public int cmdBufferImp(String cmd){
 		if( cmd == null ){
 			Log.d("ERROR","cmdBuffer cmd == null");
 			return INVALID_VALUE;
 		}
-		boolean isReset = cmd.equals("M112");
-		if(badd && !isReset){ //确保M112立即发出
-			synchronized(_cmdWaitResponsQueue){
-				if( _cmdWaitResponsQueue.size() >= MAX_BUFFER ){
-					synchronized(_cmdWaitSendQueue){
-						_cmdWaitSendQueue.add(cmd);
-					}
-					return OK_BUFFER;
-				}
-			}
-		}
+		//没有回应就不发送
+		if(_lastCmd!=null)return WAITING_RESPENDS;
+
 		int cs = 0;
 		String sum_cmd;
-		if(!_cmdWaitSendQueue.isEmpty()){
-			Log.d(TAG,"=====================ERROR=======================");
-		}
+		
 		if( _cmdLineNum==1 )
 			sum_cmd = String.format("N%d %s M110",_cmdLineNum++,cmd);
 		else
@@ -128,75 +101,45 @@ public class ReceiveActivity extends Activity  {
 		}
 		cs &= 0xff;		
 		String ncmd = String.format("%s*%d",sum_cmd,cs);
-		synchronized(_cmdWaitResponsQueue){
-			_cmdWaitResponsQueue.add(cmd);
-		}
-		cmdRaw(ncmd);
-		
-		if( isReset ){
-			/*
-			 * reprap重新启动,初始化行号，清空队列
-			 */
-			_cmdLineNum = 1;
-			synchronized(_cmdWaitResponsQueue){
-				_cmdWaitResponsQueue.clear();
-			}
-			synchronized(_cmdWaitSendQueue){
-				_cmdWaitSendQueue.clear();
-			}
-		}		
+		_lastCmd = cmd;
+		_lastNCmd = ncmd;
+		cmdRaw(ncmd);		
 		return OK_SEND;
 	}
 	public int cmdBuffer(String cmd){
-		return cmdBufferImp(cmd,true);
+		return cmdBufferImp(cmd);
 	}
-	/*
-	 * 当缓冲最大数设置为1时，缓冲算法蜕化为顺序命令方式
-	 */
-	public void setCmdBufferMaxCount(int c){
-		MAX_BUFFER = c;
+	public void synCmd(String cmd){
+		while(_lastCmd!=null)
+		{
+			try{Thread.sleep(50);}catch(Exception e){}
+		}
+		cmdBuffer(cmd);
 	}
 	public void cmdResult( String cmd,String info,int result ){
 		
 	}
 	public void completeCmd(){
-		synchronized(_cmdWaitResponsQueue){
-			_cmdWaitResponsQueue.poll();
-		}		
-		/*
-		 * 如果有缓冲的数据紧接着发出
-		 */
-		boolean isCanSend = false;
-		synchronized(_cmdWaitResponsQueue){
-			if( _cmdWaitResponsQueue.size() < MAX_BUFFER ){
-				isCanSend = true;
-			}
-		}			
-		if( isCanSend ){
-			String temp = null;
-			synchronized(_cmdWaitSendQueue){
-				if( !_cmdWaitSendQueue.isEmpty() ){
-					temp = _cmdWaitSendQueue.poll();
-				}
-			}
-			if( temp != null)
-				cmdBufferImp(temp,false); //发送不放入缓冲
-		}
+		_lastCmd = null;
+		_lastNCmd = null;
 	}
 
 	marlin _checker = new marlin();
 	public void receiver( byte [] buf ){
 		String s = new String(buf,0,buf.length);
-		String cmd;
-		synchronized(_cmdWaitResponsQueue){
-			cmd = _cmdWaitResponsQueue.peek();
+		if( _lastCmd == null ){
+			Log.d(TAG,"receviver data on _lastCmd == null");
+			return;
 		}
-		if( cmd == null )
-			cmd = "";
+		String cmd = _lastCmd;
 		int r = _checker.result(cmd, s);
 		if( r==gcode.OK )
 			completeCmd();
-		
+		else if( r==gcode.RESEND ){
+			Log.d(TAG,"Resend:"+_lastNCmd);
+			cmdRaw(_lastNCmd);
+		}
+			
 		cmdResult( cmd,s,r );
 	}
 	 protected void onCreate(Bundle savedInstanceState) {
