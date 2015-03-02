@@ -109,10 +109,12 @@ public class ReceiveActivity extends Activity  {
 	public int cmdBuffer(String cmd){
 		return cmdBufferImp(cmd);
 	}
+	static ArrayDeque<String> _synCmds=new ArrayDeque<String>();
 	public void synCmd(String cmd){
-		while(_lastCmd!=null)
+		if(_lastCmd!=null || !_synCmds.isEmpty())
 		{
-			try{Thread.sleep(50);}catch(Exception e){}
+			_synCmds.add(cmd);
+			return;
 		}
 		cmdBuffer(cmd);
 	}
@@ -122,6 +124,10 @@ public class ReceiveActivity extends Activity  {
 	public void completeCmd(){
 		_lastCmd = null;
 		_lastNCmd = null;
+		if( !_synCmds.isEmpty() )
+		{
+			cmdBuffer(_synCmds.poll());
+		}
 	}
 
 	marlin _checker = new marlin();
