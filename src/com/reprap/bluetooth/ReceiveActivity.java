@@ -103,6 +103,11 @@ public class ReceiveActivity extends Activity  {
 		String ncmd = String.format("%s*%d",sum_cmd,cs);
 		_lastCmd = cmd;
 		_lastNCmd = ncmd;
+		if( cmd.equals("M112") ){
+			_lastCmd = null;
+			_lastNCmd = null;
+			_cmdLineNum = 1;
+		}
 		cmdRaw(ncmd);		
 		return OK_SEND;
 	}
