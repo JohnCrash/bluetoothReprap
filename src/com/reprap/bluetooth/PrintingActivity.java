@@ -159,6 +159,7 @@ public class PrintingActivity extends ReceiveActivity{
         _listview.setAdapter(_list);
         
         _progress = (ProgressBar)findViewById(R.id.progressBar1);
+        if(_printThread!=null)return;
         _printFileName = getIntent().getStringExtra("file");
         if( _printFileName != null ){
         	//file print
@@ -205,11 +206,12 @@ public class PrintingActivity extends ReceiveActivity{
     					do{
     						int b = _in.read();
     						if( _printThread != thisThread ){
+    							_printThread = null;
     							return;
     						}
     						if( b == -1 ){
     							//End of Stream
-    							thisThread = null;
+    							_printThread = null;
     							_in.close();
     							_in = null;
     							break;
@@ -230,6 +232,7 @@ public class PrintingActivity extends ReceiveActivity{
 	    						while( isCmdBufferOver() ){
 	    							sleep(50);
 	    							if( _printThread != thisThread ){
+	    								_printThread = null;
 	    								break;
 	    							}
 	    						}
@@ -247,6 +250,7 @@ public class PrintingActivity extends ReceiveActivity{
     			/*
     			 * 等待打印完全结束
     			 */
+    			_printThread = null;
     			boolean istimeout = false;
     			int waitcount = 0;
     			while(!isCmdBufferEmpty()){
